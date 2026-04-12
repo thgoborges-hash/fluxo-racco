@@ -3,7 +3,7 @@ services:
     name: fluxo-racco
     runtime: static
     buildCommand: ""
-    staticPublishPath: ./public
+    staticPublishPath: ./
     headers:
       - path: /*
         name: Cache-Control
