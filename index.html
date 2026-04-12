@@ -490,6 +490,42 @@
   .saving-row .t-label { font-size: 12px; color: var(--accent-green); font-weight: 600; text-transform: uppercase; }
   .saving-row .t-value { font-size: 20px; font-weight: 800; color: var(--accent-green); }
 
+  /* DFs Tab */
+  .dfs-container { max-width: 900px; width: 100%; margin: 0 auto; padding: 20px 20px 40px; }
+  .dfs-company { margin-bottom: 30px; }
+  .dfs-company-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .dfs-company-header .icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .dfs-company-header .icon.bay { background: rgba(79,140,255,0.15); }
+  .dfs-company-header .icon.lang { background: rgba(168,85,247,0.15); }
+  .dfs-company-header h2 { font-size: 18px; font-weight: 700; }
+  .dfs-company-header .sub { font-size: 12px; color: var(--text-muted); }
+  .dfs-section { margin-bottom: 16px; }
+  .dfs-section h3 { font-size: 13px; font-weight: 600; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; padding: 8px 12px; background: rgba(79,140,255,0.08); border-radius: 8px; }
+  .dfs-section h3.purple { color: var(--accent-purple); background: rgba(168,85,247,0.08); }
+  .dfs-section h3.green { color: var(--accent-green); background: rgba(52,211,153,0.08); }
+  .dfs-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .dfs-table th { text-align: left; padding: 6px 10px; color: var(--text-dim); font-weight: 500; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid var(--border); }
+  .dfs-table th.num { text-align: right; }
+  .dfs-table td { padding: 5px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-muted); }
+  .dfs-table td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .dfs-table tr.total td { font-weight: 700; color: var(--text); border-top: 1px solid var(--border); }
+  .dfs-table tr.total td.num.positive { color: var(--accent-green); }
+  .dfs-table tr.total td.num.negative { color: var(--accent-red); }
+  .dfs-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .dfs-table td.indent { padding-left: 24px; }
+  .dfs-kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .dfs-kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .dfs-kpi .label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; font-weight: 500; letter-spacing: 0.3px; margin-bottom: 4px; }
+  .dfs-kpi .val { font-size: 16px; font-weight: 700; }
+  .dfs-kpi .val.blue { color: var(--accent-blue); }
+  .dfs-kpi .val.purple { color: var(--accent-purple); }
+  .dfs-kpi .val.red { color: var(--accent-red); }
+  .dfs-kpi .val.green { color: var(--accent-green); }
+  .dfs-kpi .yr { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+  .dfs-toggle { display: flex; gap: 4px; margin-bottom: 16px; }
+  .dfs-toggle button { padding: 6px 14px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .dfs-toggle button.active { background: rgba(79,140,255,0.15); color: var(--accent-blue); border-color: rgba(79,140,255,0.3); }
+
   /* Notes */
   .notes-section {
     max-width: 720px;
@@ -542,6 +578,7 @@
   <button class="tab-btn active" onclick="switchTab('flow')">Fluxo Operacional</button>
   <button class="tab-btn" onclick="switchTab('sim')">Simulação Tributária</button>
   <button class="tab-btn" onclick="switchTab('products')">Catálogo / NCMs</button>
+  <button class="tab-btn" onclick="switchTab('dfs')">Demonstrativos</button>
 </div>
 
 <!-- ==================== TAB 1: FLUXO ==================== -->
@@ -569,7 +606,7 @@
       <div class="detail-item">
         <div class="detail-label">Faturamento mensal estimado</div>
         <div class="detail-value blue" id="bayonneRevenue">R$ 1.200.000,00</div>
-        <div class="detail-sub">Venda integral para Langon (preço de transferência ≈ 40% do preço final)</div>
+        <div class="detail-sub">Venda integral para Langon (preço de transferência ≈ 60% do preço final)</div>
       </div>
       <div class="detail-item">
         <div class="detail-label">Atividade</div>
@@ -619,40 +656,40 @@
       </div>
       <div class="detail-item">
         <div class="detail-label">Composição do preço</div>
-        <div class="detail-value purple">60% serviço / 40% produto</div>
+        <div class="detail-value purple">60% produto / 40% serviço</div>
         <div class="detail-sub">Estratégia de desoneração tributária</div>
       </div>
       <div class="detail-item">
-        <div class="detail-label">Parcela produto (40%)</div>
-        <div class="detail-value blue" id="langonProduct">R$ 1.200.000,00</div>
-        <div class="detail-sub">Incide ICMS — base de cálculo reduzida</div>
+        <div class="detail-label">Parcela produto (60%)</div>
+        <div class="detail-value blue" id="langonProduct">R$ 1.800.000,00</div>
+        <div class="detail-sub">Incide ICMS — base de cálculo</div>
       </div>
       <div class="detail-item">
-        <div class="detail-label">Parcela serviço (60%)</div>
-        <div class="detail-value cyan" id="langonService">R$ 1.800.000,00</div>
+        <div class="detail-label">Parcela serviço (40%)</div>
+        <div class="detail-value cyan" id="langonService">R$ 1.200.000,00</div>
         <div class="detail-sub">Incide ISS municipal (2% a 5%)</div>
       </div>
       <div class="detail-item full">
         <div class="split-bar">
-          <div class="service" style="width:60%;">Serviço — 60% (ISS)</div>
-          <div class="product" style="width:40%;">Produto — 40% (ICMS)</div>
+          <div class="product" style="width:60%;">Produto — 60% (ICMS)</div>
+          <div class="service" style="width:40%;">Serviço — 40% (ISS)</div>
         </div>
       </div>
     </div>
     <div class="strategy-box">
       <h4>Estratégia tributária vigente</h4>
-      <p>Ao segregar 60% como serviço, a base de ICMS (e potencial ICMS-ST) cai para 40% do faturamento. A parcela de serviço paga ISS municipal (2%–5%), geralmente mais favorável. Os advogados devem avaliar se essa segregação se sustenta perante o fisco estadual, especialmente considerando que o <strong>NCM 3401.30.00</strong> está sujeito a ICMS-ST com <strong>MVA de 51,37%</strong> em diversos protocolos.</p>
+      <p>Ao segregar 40% como serviço, a base de ICMS (e potencial ICMS-ST) fica em 60% do faturamento. A parcela de serviço (40%) paga ISS municipal (2%–5%), geralmente mais favorável. Os advogados devem avaliar se essa segregação se sustenta perante o fisco estadual, especialmente considerando que o <strong>NCM 3401.30.00</strong> está sujeito a ICMS-ST com <strong>MVA de 51,37%</strong> em diversos protocolos.</p>
     </div>
     <div class="tax-box">
       <h4>Risco — ICMS-ST na saída interestadual</h4>
-      <p>Se o NCM 3401.30.00 tiver <span class="highlight">protocolo de ST</span> entre PR e os estados de destino (PE, BA, CE etc.), a Langon deve recolher o ICMS-ST antecipadamente. A base do ST seria o <span class="highlight">preço de venda + MVA 51,37%</span>. A proporção 60/40 reduz essa base, mas pode ser questionada como <span class="highlight">planejamento tributário abusivo</span>.</p>
+      <p>Se o NCM 3401.30.00 tiver <span class="highlight">protocolo de ST</span> entre PR e os estados de destino (PE, BA, CE etc.), a Langon deve recolher o ICMS-ST antecipadamente. A base do ST seria o <span class="highlight">preço de venda + MVA 51,37%</span>. A proporção 60/40 (produto/serviço) faz com que apenas 60% entre na base de ST, mas a segregação pode ser questionada como <span class="highlight">planejamento tributário abusivo</span>.</p>
     </div>
   </div>
 
   <!-- Arrow 2 -->
   <div class="arrow-connector">
     <div class="arrow-line"></div>
-    <div class="arrow-label">NF-e <strong>produto</strong> (40%) + NF-e <strong>serviço</strong> (60%) · Interestadual PR → diversos · ICMS 7%/12%</div>
+    <div class="arrow-label">NF-e <strong>produto</strong> (60%) + NF-e <strong>serviço</strong> (40%) · Interestadual PR → diversos · ICMS 7%/12%</div>
     <div class="arrow-line" style="height:16px;"></div>
     <div class="arrow-tip"></div>
   </div>
@@ -727,12 +764,12 @@
       <div class="summary-card">
         <div class="s-label">Base ICMS</div>
         <div class="s-value purple" id="sumIcms">R$ 1,2M</div>
-        <div class="s-sub">40% do faturamento</div>
+        <div class="s-sub">60% do faturamento</div>
       </div>
       <div class="summary-card">
         <div class="s-label">Base ISS</div>
-        <div class="s-value cyan" id="sumIss">R$ 1,8M</div>
-        <div class="s-sub">60% do faturamento</div>
+        <div class="s-value cyan" id="sumIss">R$ 1,2M</div>
+        <div class="s-sub">40% do faturamento</div>
       </div>
       <div class="summary-card">
         <div class="s-label">Produtos</div>
@@ -788,17 +825,17 @@
     <h3><span>🏢</span> Etapa 2 — Langon (Split 60/40 → Revendedores)</h3>
 
     <div style="margin-bottom:16px;">
-      <div class="detail-label" style="margin-bottom:8px;">Cenário atual — Proporção 60% Serviço / 40% Produto</div>
+      <div class="detail-label" style="margin-bottom:8px;">Cenário atual — Proporção 60% Produto / 40% Serviço</div>
       <div class="split-bar">
-        <div class="service" style="width:60%;">Serviço 60% → ISS</div>
-        <div class="product" style="width:40%;">Produto 40% → ICMS</div>
+        <div class="product" style="width:60%;">Produto 60% → ICMS</div>
+        <div class="service" style="width:40%;">Serviço 40% → ISS</div>
       </div>
     </div>
 
     <div class="tax-grid">
       <div class="tax-cell">
-        <div class="t-label">Base ICMS (40%)</div>
-        <div class="t-value blue" id="s2BaseIcms">R$ 1.200.000</div>
+        <div class="t-label">Base ICMS (60%)</div>
+        <div class="t-value blue" id="s2BaseIcms">R$ 1.800.000</div>
         <div class="t-rate">Parcela de produto</div>
       </div>
       <div class="tax-cell">
@@ -814,8 +851,8 @@
     </div>
     <div class="tax-grid" style="margin-top:8px;">
       <div class="tax-cell">
-        <div class="t-label">Base ISS (60%)</div>
-        <div class="t-value cyan" id="s2BaseIss">R$ 1.800.000</div>
+        <div class="t-label">Base ISS (40%)</div>
+        <div class="t-value cyan" id="s2BaseIss">R$ 1.200.000</div>
         <div class="t-rate">Parcela de serviço</div>
       </div>
       <div class="tax-cell">
@@ -839,7 +876,7 @@
       <div class="tax-cell">
         <div class="t-label">Base ST (c/ MVA)</div>
         <div class="t-value orange" id="s2BaseSt">R$ 1.816.440</div>
-        <div class="t-rate">R$ 1,2M × 1,5137</div>
+        <div class="t-rate">R$ 1,8M × 1,5137</div>
       </div>
       <div class="tax-cell">
         <div class="t-label">ICMS-ST destino (19,5%)</div>
@@ -925,6 +962,151 @@
       </tbody>
     </table>
   </div>
+</div>
+</div>
+
+<!-- ==================== TAB 4: DEMONSTRATIVOS ==================== -->
+<div class="tab-content" id="tab-dfs">
+<div class="dfs-container">
+
+  <!-- KPIs resumo -->
+  <div style="margin-bottom:24px;">
+    <h3 style="font-size:16px; font-weight:700; margin-bottom:12px;">Resumo — Indicadores-chave 2025</h3>
+    <div class="dfs-kpi-grid">
+      <div class="dfs-kpi"><div class="label">Receita Líquida Bayonne</div><div class="val blue">R$ 5,85M</div><div class="yr">2025 (vs R$ 9,34M em 2024)</div></div>
+      <div class="dfs-kpi"><div class="label">Receita Líquida Langon</div><div class="val purple">R$ 20,92M</div><div class="yr">2025 (vs R$ 20,92M em 2024)</div></div>
+      <div class="dfs-kpi"><div class="label">Prejuízo Bayonne</div><div class="val red">(R$ 7,73M)</div><div class="yr">2025 (vs R$ 63,4M em 2024)</div></div>
+      <div class="dfs-kpi"><div class="label">Prejuízo Langon</div><div class="val red">(R$ 4,90M)</div><div class="yr">2025 (vs R$ 97,6M em 2024)</div></div>
+      <div class="dfs-kpi"><div class="label">PL Bayonne</div><div class="val red">(R$ 99,8M)</div><div class="yr">Patrimônio Líquido negativo</div></div>
+      <div class="dfs-kpi"><div class="label">PL Langon</div><div class="val red">(R$ 156,6M)</div><div class="yr">Patrimônio Líquido negativo</div></div>
+      <div class="dfs-kpi"><div class="label">Ativo Total Bayonne</div><div class="val blue">R$ 329,5M</div><div class="yr">Inclui R$ 275M fiscal diferido</div></div>
+      <div class="dfs-kpi"><div class="label">Ativo Total Langon</div><div class="val purple">R$ 100,8M</div><div class="yr">Inclui R$ 60,2M fiscal diferido</div></div>
+    </div>
+  </div>
+
+  <!-- ===== BAYONNE ===== -->
+  <div class="dfs-company">
+    <div class="dfs-company-header">
+      <div class="icon bay">🏭</div>
+      <div><h2>Bayonne Cosméticos</h2><div class="sub">INDÚSTRIA — Curitiba/PR · Demonstrações Contábeis 2025 e 2024</div></div>
+    </div>
+
+    <div class="dfs-section">
+      <h3>DRE — Demonstração do Resultado</h3>
+      <table class="dfs-table">
+        <thead><tr><th>Conta</th><th class="num">Dez/2025</th><th class="num">Dez/2024</th></tr></thead>
+        <tbody>
+          <tr><td>Receita operacional líquida</td><td class="num">5.845.917,96</td><td class="num">9.342.478,74</td></tr>
+          <tr><td>Custo dos produtos vendidos</td><td class="num">(6.790.755,82)</td><td class="num">(9.191.764,95)</td></tr>
+          <tr class="total"><td>Resultado Bruto</td><td class="num negative">(944.837,86)</td><td class="num positive">150.713,79</td></tr>
+          <tr><td class="indent">Despesas com pessoal</td><td class="num">(4.430.952,82)</td><td class="num">(3.502.240,13)</td></tr>
+          <tr><td class="indent">Despesas tributárias</td><td class="num">(410.607,17)</td><td class="num">(348.802.772,33)</td></tr>
+          <tr><td class="indent">Despesas gerais e admin.</td><td class="num">(2.006.057,84)</td><td class="num">(3.641.506,49)</td></tr>
+          <tr><td class="indent">Outras receitas/despesas</td><td class="num">64.522,42</td><td class="num">18.479.423,86</td></tr>
+          <tr class="total"><td>Resultado antes do financeiro</td><td class="num negative">(7.727.933,27)</td><td class="num negative">(337.316.381,30)</td></tr>
+          <tr><td class="indent">Receitas financeiras</td><td class="num">0,00</td><td class="num">2.400,78</td></tr>
+          <tr><td class="indent">Despesas financeiras</td><td class="num">(2.853,56)</td><td class="num">(1.193.523,91)</td></tr>
+          <tr><td>IR e CSLL Diferidos</td><td class="num">0,00</td><td class="num">275.110.795,83</td></tr>
+          <tr class="total"><td>Prejuízo do exercício</td><td class="num negative">(7.730.786,83)</td><td class="num negative">(63.396.708,60)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dfs-section">
+      <h3 class="green">Balanço Patrimonial</h3>
+      <table class="dfs-table">
+        <thead><tr><th>Conta</th><th class="num">Dez/2025</th><th class="num">Dez/2024</th></tr></thead>
+        <tbody>
+          <tr style="font-weight:600;"><td>ATIVO CIRCULANTE</td><td class="num">4.380.556,06</td><td class="num">3.009.878,19</td></tr>
+          <tr><td class="indent">Caixa e equivalentes</td><td class="num">9.845,53</td><td class="num">2.844,90</td></tr>
+          <tr><td class="indent">Contas a receber</td><td class="num">1.533.695,32</td><td class="num">470.283,65</td></tr>
+          <tr><td class="indent">Estoques</td><td class="num">571.230,68</td><td class="num">238.666,85</td></tr>
+          <tr><td class="indent">Impostos a recuperar</td><td class="num">2.260.693,17</td><td class="num">2.296.273,72</td></tr>
+          <tr style="font-weight:600;"><td>ATIVO NÃO CIRCULANTE</td><td class="num">325.094.923,92</td><td class="num">325.315.168,80</td></tr>
+          <tr><td class="indent">Ativo fiscal diferido</td><td class="num">275.110.797,83</td><td class="num">275.110.797,83</td></tr>
+          <tr><td class="indent">Imobilizado</td><td class="num">49.352.997,10</td><td class="num">49.550.463,97</td></tr>
+          <tr class="total"><td>TOTAL ATIVO</td><td class="num">329.475.479,98</td><td class="num">328.325.046,99</td></tr>
+          <tr style="font-weight:600;"><td>PASSIVO CIRCULANTE</td><td class="num">21.952.663,67</td><td class="num">21.506.201,38</td></tr>
+          <tr><td class="indent">Fornecedores</td><td class="num">70.000,00</td><td class="num">4.985.246,68</td></tr>
+          <tr><td class="indent">Empréstimos e financiamentos</td><td class="num">1.917.364,95</td><td class="num">2.032.579,89</td></tr>
+          <tr><td class="indent">Obrigações trabalhistas</td><td class="num">4.182.380,54</td><td class="num">2.101.875,02</td></tr>
+          <tr><td class="indent">Obrigações tributárias</td><td class="num">7.481.949,74</td><td class="num">5.764.957,96</td></tr>
+          <tr><td class="indent">Parcelamentos</td><td class="num">7.927.195,94</td><td class="num">6.247.769,33</td></tr>
+          <tr style="font-weight:600;"><td>PASSIVO NÃO CIRCULANTE</td><td class="num">407.310.652,17</td><td class="num">398.875.894,64</td></tr>
+          <tr><td class="indent">Emprést. partes relacionadas</td><td class="num">23.903.833,56</td><td class="num">12.734.045,74</td></tr>
+          <tr><td class="indent">Parcelamentos LP</td><td class="num">383.406.818,61</td><td class="num">386.141.848,90</td></tr>
+          <tr class="total"><td>PATRIMÔNIO LÍQUIDO</td><td class="num negative">(99.787.835,86)</td><td class="num negative">(92.057.049,03)</td></tr>
+          <tr><td class="indent">Capital social</td><td class="num">4.800.000,00</td><td class="num">4.800.000,00</td></tr>
+          <tr><td class="indent">Prejuízos acumulados</td><td class="num">(138.268.064,71)</td><td class="num">(130.537.277,88)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== LANGON ===== -->
+  <div class="dfs-company">
+    <div class="dfs-company-header">
+      <div class="icon lang">🏢</div>
+      <div><h2>Langon Cosméticos</h2><div class="sub">COMERCIAL / SERVIÇOS — Curitiba/PR · Demonstrações Contábeis 2025 e 2024</div></div>
+    </div>
+
+    <div class="dfs-section">
+      <h3 class="purple">DRE — Demonstração do Resultado</h3>
+      <table class="dfs-table">
+        <thead><tr><th>Conta</th><th class="num">Dez/2025</th><th class="num">Dez/2024</th></tr></thead>
+        <tbody>
+          <tr><td>Receita operacional bruta</td><td class="num">26.301.883,66</td><td class="num">26.019.288,28</td></tr>
+          <tr><td>Deduções (ICMS, PIS, COFINS, IPI, ISS)</td><td class="num">(5.384.978,95)</td><td class="num">(5.102.999,00)</td></tr>
+          <tr class="total"><td>Receita operacional líquida</td><td class="num">20.916.904,71</td><td class="num">20.916.288,28</td></tr>
+          <tr><td>Custo das mercadorias vendidas</td><td class="num">(10.958.096,90)</td><td class="num">(9.799.916,92)</td></tr>
+          <tr class="total"><td>Resultado Bruto</td><td class="num positive">9.958.807,81</td><td class="num positive">16.219.371,36</td></tr>
+          <tr><td class="indent">Despesas com pessoal</td><td class="num">(4.376.471,72)</td><td class="num">(4.122.507,45)</td></tr>
+          <tr><td class="indent">Despesas tributárias</td><td class="num">(233.265,66)</td><td class="num">(140.560.723,34)</td></tr>
+          <tr><td class="indent">Despesas gerais e admin.</td><td class="num">(8.889.339,60)</td><td class="num">(7.757.495,05)</td></tr>
+          <tr><td class="indent">Outras receitas operacionais</td><td class="num">805.400,00</td><td class="num">1.767,96</td></tr>
+          <tr class="total"><td>Resultado antes do financeiro</td><td class="num negative">(2.734.869,17)</td><td class="num negative">(136.219.586,52)</td></tr>
+          <tr><td class="indent">Receitas financeiras</td><td class="num">422,38</td><td class="num">142.981,99</td></tr>
+          <tr><td class="indent">Despesas financeiras</td><td class="num">(2.168.469,42)</td><td class="num">(21.729.852,08)</td></tr>
+          <tr><td>IR e CSLL Diferidos</td><td class="num">0,00</td><td class="num">60.199.465,15</td></tr>
+          <tr class="total"><td>Prejuízo do exercício</td><td class="num negative">(4.902.916,21)</td><td class="num negative">(97.606.991,46)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dfs-section">
+      <h3 class="green">Balanço Patrimonial</h3>
+      <table class="dfs-table">
+        <thead><tr><th>Conta</th><th class="num">Dez/2025</th><th class="num">Dez/2024</th></tr></thead>
+        <tbody>
+          <tr style="font-weight:600;"><td>ATIVO CIRCULANTE</td><td class="num">10.193.976,99</td><td class="num">5.419.811,33</td></tr>
+          <tr><td class="indent">Caixa e equivalentes</td><td class="num">138.325,06</td><td class="num">259.721,88</td></tr>
+          <tr><td class="indent">Contas a receber</td><td class="num">5.181.067,95</td><td class="num">148.681,22</td></tr>
+          <tr><td class="indent">Estoques</td><td class="num">433.650,05</td><td class="num">972.944,20</td></tr>
+          <tr><td class="indent">Impostos a recuperar</td><td class="num">4.439.633,15</td><td class="num">3.919.553,66</td></tr>
+          <tr style="font-weight:600;"><td>ATIVO NÃO CIRCULANTE</td><td class="num">90.561.713,54</td><td class="num">89.762.749,01</td></tr>
+          <tr><td class="indent">Emprést. partes relacionadas</td><td class="num">19.310.350,95</td><td class="num">17.401.851,72</td></tr>
+          <tr><td class="indent">Ativo fiscal diferido</td><td class="num">60.199.465,15</td><td class="num">60.199.465,15</td></tr>
+          <tr><td class="indent">Imobilizado</td><td class="num">9.755.273,75</td><td class="num">10.203.608,39</td></tr>
+          <tr class="total"><td>TOTAL ATIVO</td><td class="num">100.755.690,53</td><td class="num">95.182.560,34</td></tr>
+          <tr style="font-weight:600;"><td>PASSIVO CIRCULANTE</td><td class="num">67.344.689,78</td><td class="num">56.454.866,95</td></tr>
+          <tr><td class="indent">Fornecedores</td><td class="num">11.464.982,03</td><td class="num">3.237.378,26</td></tr>
+          <tr><td class="indent">Empréstimos e financiamentos</td><td class="num">11.708.305,52</td><td class="num">13.885.947,34</td></tr>
+          <tr><td class="indent">Obrigações trabalhistas</td><td class="num">4.673.080,18</td><td class="num">3.183.809,32</td></tr>
+          <tr><td class="indent">Obrigações tributárias</td><td class="num">36.892.812,02</td><td class="num">34.420.859,52</td></tr>
+          <tr><td class="indent">Parcelamentos</td><td class="num">1.993.510,03</td><td class="num">1.630.320,48</td></tr>
+          <tr style="font-weight:600;"><td>PASSIVO NÃO CIRCULANTE</td><td class="num">189.976.162,49</td><td class="num">190.389.938,92</td></tr>
+          <tr><td class="indent">Emprést. e financiamentos LP</td><td class="num">3.191.511,01</td><td class="num">3.501.052,33</td></tr>
+          <tr><td class="indent">Emprést. partes relacionadas</td><td class="num">6.220.390,39</td><td class="num">6.220.390,39</td></tr>
+          <tr><td class="indent">Parcelamentos LP</td><td class="num">178.687.263,44</td><td class="num">180.621.498,55</td></tr>
+          <tr><td class="indent">Provisão p/ contingências</td><td class="num">1.876.997,65</td><td class="num">46.997,65</td></tr>
+          <tr class="total"><td>PATRIMÔNIO LÍQUIDO</td><td class="num negative">(156.565.161,74)</td><td class="num negative">(151.662.245,53)</td></tr>
+          <tr><td class="indent">Capital social</td><td class="num">2.320.000,00</td><td class="num">2.320.000,00</td></tr>
+          <tr><td class="indent">Prejuízos acumulados</td><td class="num">(166.364.556,46)</td><td class="num">(161.461.640,25)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 </div>
 
@@ -1043,8 +1225,8 @@ function parseBRL(s) { return parseFloat(s.replace(/\./g,'').replace(',','.'))||
 
 function recalculate() {
   var total = parseBRL(document.getElementById('revenueInput').value);
-  var prod40 = total * 0.4;
-  var serv60 = total * 0.6;
+  var prod40 = total * 0.6;
+  var serv60 = total * 0.4;
   var bayonne = prod40;
 
   // Flow tab
