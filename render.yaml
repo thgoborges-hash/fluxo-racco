@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: fluxo-racco
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: ./public
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
