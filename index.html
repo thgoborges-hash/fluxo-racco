@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluxo Operacional — Grupo Racco Cosméticos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2e3d;
+    --accent-blue: #4f8cff;
+    --accent-purple: #a855f7;
+    --accent-green: #34d399;
+    --accent-orange: #fb923c;
+    --accent-red: #f87171;
+    --accent-cyan: #22d3ee;
+    --accent-yellow: #facc15;
+    --text: #e8eaf0;
+    --text-muted: #8b90a0;
+    --text-dim: #5a5f73;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .header p {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .header .badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 4px 14px;
+    background: rgba(79,140,255,0.12);
+    border: 1px solid rgba(79,140,255,0.25);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin: 20px auto;
+    max-width: 500px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: rgba(79,140,255,0.15);
+    color: var(--accent-blue);
+  }
+  .tab-btn:hover:not(.active) {
+    color: var(--text);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Simulation Bar */
+  .sim-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 20px;
+    margin: 20px auto;
+    max-width: 700px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    flex-wrap: wrap;
+  }
+  .sim-bar label {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .sim-bar input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    width: 200px;
+    text-align: right;
+  }
+  .sim-bar input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(79,140,255,0.15);
+  }
+  .sim-bar button {
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    border: none;
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .sim-bar button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(79,140,255,0.3);
+  }
+
+  /* Flow container */
+  .flow-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px 40px;
+    gap: 0;
+  }
+
+  /* Entity Card */
+  .entity {
+    width: 100%;
+    max-width: 720px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .entity:hover {
+    border-color: rgba(79,140,255,0.3);
+    box-shadow: 0 0 30px rgba(79,140,255,0.06);
+  }
+  .entity-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .entity-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .entity-icon.industry { background: rgba(79,140,255,0.15); }
+  .entity-icon.commerce { background: rgba(168,85,247,0.15); }
+  .entity-icon.resellers { background: rgba(52,211,153,0.15); }
+  .entity-name { font-size: 20px; font-weight: 700; }
+  .entity-type { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  .entity-location { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+  .entity-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .detail-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .detail-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+  .detail-value {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .detail-value.blue { color: var(--accent-blue); }
+  .detail-value.purple { color: var(--accent-purple); }
+  .detail-value.green { color: var(--accent-green); }
+  .detail-value.orange { color: var(--accent-orange); }
+  .detail-value.red { color: var(--accent-red); }
+  .detail-value.cyan { color: var(--accent-cyan); }
+  .detail-value.yellow { color: var(--accent-yellow); }
+  .detail-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .detail-item.full { grid-column: 1 / -1; }
+
+  .split-bar {
+    display: flex;
+    height: 28px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .split-bar .service {
+    background: rgba(168,85,247,0.3);
+    color: var(--accent-purple);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .split-bar .product {
+    background: rgba(79,140,255,0.3);
+    color: var(--accent-blue);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Arrow */
+  .arrow-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+  }
+  .arrow-line {
+    width: 2px;
+    height: 36px;
+    background: linear-gradient(180deg, var(--border), var(--accent-blue));
+  }
+  .arrow-label {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .arrow-label strong { color: var(--text); font-weight: 700; }
+  .arrow-tip {
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid var(--accent-blue);
+  }
+
+  /* Box styles */
+  .tax-box {
+    background: rgba(248,113,113,0.08);
+    border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 14px;
+  }
+  .tax-box h4 { font-size: 12px; color: var(--accent-red); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .tax-box p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .tax-box .highlight { color: var(--accent-orange); font-weight: 600; }
+
+  .strategy-box {
+    background: rgba(52,211,153,0.08);
+    border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 14px;
+  }
+  .strategy-box h4 { font-size: 12px; color: var(--accent-green); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .strategy-box p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  .info-box {
+    background: rgba(79,140,255,0.08);
+    border: 1px solid rgba(79,140,255,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 14px;
+  }
+  .info-box h4 { font-size: 12px; color: var(--accent-blue); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .info-box p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* Resellers */
+  .resellers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .reseller-chip {
+    background: rgba(52,211,153,0.08);
+    border: 1px solid rgba(52,211,153,0.15);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .reseller-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); flex-shrink: 0; }
+  .reseller-chip .name { color: var(--text); font-weight: 500; flex: 1; }
+  .reseller-chip .loc { color: var(--text-dim); font-size: 11px; }
+  .reseller-chip .remove-btn {
+    background: none; border: none; color: var(--text-dim); cursor: pointer;
+    font-size: 14px; padding: 0 2px; line-height: 1; transition: color 0.2s;
+  }
+  .reseller-chip .remove-btn:hover { color: var(--accent-red); }
+
+  .add-reseller {
+    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .add-reseller input {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 8px 12px; border-radius: 8px; font-size: 13px;
+    font-family: 'Inter', sans-serif; flex: 1; min-width: 120px;
+  }
+  .add-reseller input:focus { outline: none; border-color: var(--accent-green); box-shadow: 0 0 0 3px rgba(52,211,153,0.12); }
+  .add-reseller input::placeholder { color: var(--text-dim); }
+  .add-reseller button {
+    background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3);
+    color: var(--accent-green); padding: 8px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  .add-reseller button:hover { background: rgba(52,211,153,0.25); }
+
+  /* Fiscal table */
+  .fiscal-section {
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .fiscal-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .fiscal-table th {
+    text-align: left;
+    padding: 10px 12px;
+    background: rgba(79,140,255,0.1);
+    color: var(--accent-blue);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid var(--border);
+  }
+  .fiscal-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--text-muted);
+  }
+  .fiscal-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .fiscal-table .val { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .fiscal-table .neg { color: var(--accent-red); }
+  .fiscal-table .pos { color: var(--accent-green); }
+
+  /* Summary cards */
+  .summary-section {
+    max-width: 720px;
+    width: 100%;
+    margin: 30px auto 20px;
+    padding: 0 20px;
+  }
+  .summary-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .summary-card .s-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+  .summary-card .s-value { font-size: 18px; font-weight: 800; }
+  .summary-card .s-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Tax simulation table */
+  .sim-table-wrap {
+    max-width: 720px;
+    width: 100%;
+    margin: 20px auto;
+    padding: 0 20px;
+  }
+  .sim-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .sim-card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sim-card h3 span { font-size: 18px; }
+
+  .tax-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .tax-cell {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .tax-cell .t-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px; }
+  .tax-cell .t-value { font-size: 15px; font-weight: 700; }
+  .tax-cell .t-rate { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .tax-cell.full { grid-column: 1 / -1; }
+  .tax-cell.half { grid-column: span 1; }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 10px;
+  }
+  .total-row .t-label { font-size: 12px; color: var(--accent-red); font-weight: 600; text-transform: uppercase; }
+  .total-row .t-value { font-size: 20px; font-weight: 800; color: var(--accent-red); }
+  .total-row .t-pct { font-size: 12px; color: var(--text-muted); }
+
+  .saving-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    padding: 12px 16px;
+    background: rgba(52,211,153,0.1);
+    border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 10px;
+  }
+  .saving-row .t-label { font-size: 12px; color: var(--accent-green); font-weight: 600; text-transform: uppercase; }
+  .saving-row .t-value { font-size: 20px; font-weight: 800; color: var(--accent-green); }
+
+  /* Notes */
+  .notes-section {
+    max-width: 720px;
+    width: 100%;
+    margin: 20px auto 50px;
+    padding: 0 20px;
+  }
+  .notes-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .notes-box h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--accent-orange); }
+  .notes-box textarea {
+    width: 100%; min-height: 80px; background: var(--bg);
+    border: 1px solid var(--border); color: var(--text); padding: 12px;
+    border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 13px;
+    resize: vertical; line-height: 1.5;
+  }
+  .notes-box textarea:focus { outline: none; border-color: var(--accent-orange); }
+
+  .footer {
+    text-align: center; padding: 20px; font-size: 11px;
+    color: var(--text-dim); border-top: 1px solid var(--border);
+  }
+
+  @media print {
+    body { background: #fff; color: #1a1a1a; }
+    .entity, .sim-card, .summary-card { border: 1px solid #ddd; background: #fafafa; }
+    .sim-bar button, .add-reseller button, .remove-btn, .tabs { display: none; }
+  }
+  @media (max-width: 600px) {
+    .entity-details, .tax-grid { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Fluxo Operacional — Grupo Racco Cosméticos</h1>
+  <p>Mapeamento da cadeia produtiva e comercial para análise tributária (ICMS / ICMS-ST)</p>
+  <div class="badge">Documento de trabalho — Uso interno · Abril 2026</div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('flow')">Fluxo Operacional</button>
+  <button class="tab-btn" onclick="switchTab('sim')">Simulação Tributária</button>
+  <button class="tab-btn" onclick="switchTab('products')">Catálogo / NCMs</button>
+</div>
+
+<!-- ==================== TAB 1: FLUXO ==================== -->
+<div class="tab-content active" id="tab-flow">
+
+<div class="sim-bar">
+  <label>Faturamento mensal Langon (preço final ao revendedor):</label>
+  <input type="text" id="revenueInput" value="3.000.000,00" placeholder="0,00">
+  <button onclick="recalculate()">Recalcular</button>
+</div>
+
+<div class="flow-container">
+
+  <!-- BAYONNE -->
+  <div class="entity">
+    <div class="entity-header">
+      <div class="entity-icon industry">🏭</div>
+      <div>
+        <div class="entity-name">Bayonne</div>
+        <div class="entity-type">Indústria — Fabricação de Cosméticos</div>
+        <div class="entity-location">📍 Curitiba — PR</div>
+      </div>
+    </div>
+    <div class="entity-details">
+      <div class="detail-item">
+        <div class="detail-label">Faturamento mensal estimado</div>
+        <div class="detail-value blue" id="bayonneRevenue">R$ 1.200.000,00</div>
+        <div class="detail-sub">Venda integral para Langon (preço de transferência ≈ 40% do preço final)</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Atividade</div>
+        <div class="detail-value blue">Indústria pura</div>
+        <div class="detail-sub">Produz e vende 100% para a Langon</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">NCM principal</div>
+        <div class="detail-value blue">3401.30.00</div>
+        <div class="detail-sub">Produtos orgânicos tensoativos para pele</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">IPI (B2B)</div>
+        <div class="detail-value orange">6,5%</div>
+        <div class="detail-sub">Sobre o preço de saída industrial</div>
+      </div>
+    </div>
+    <div class="tax-box">
+      <h4>Tributação na saída industrial (Bayonne → Langon)</h4>
+      <p>Operação <span class="highlight">interna PR → PR</span>. A Bayonne recolhe ICMS próprio (12%), IPI (6,5%) e PIS/COFINS (9,25%). O preço de transferência entre empresas do grupo deve respeitar o <span class="highlight">valor de mercado</span> para evitar questionamento fiscal. MVA de 51,37% pode ser aplicada se houver protocolo de ICMS-ST para o NCM na operação interna.</p>
+    </div>
+  </div>
+
+  <!-- Arrow 1 -->
+  <div class="arrow-connector">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">NF-e de <strong>produto</strong> · Operação interna PR→PR · ICMS 12% · IPI 6,5%</div>
+    <div class="arrow-line" style="height:16px;"></div>
+    <div class="arrow-tip"></div>
+  </div>
+
+  <!-- LANGON -->
+  <div class="entity">
+    <div class="entity-header">
+      <div class="entity-icon commerce">🏢</div>
+      <div>
+        <div class="entity-name">Langon</div>
+        <div class="entity-type">Comercial + Serviços — Revenda e prestação</div>
+        <div class="entity-location">📍 Curitiba — PR</div>
+      </div>
+    </div>
+    <div class="entity-details">
+      <div class="detail-item">
+        <div class="detail-label">Faturamento total mensal</div>
+        <div class="detail-value purple" id="langonRevenue">R$ 3.000.000,00</div>
+        <div class="detail-sub">Preço final cobrado dos revendedores</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Composição do preço</div>
+        <div class="detail-value purple">60% serviço / 40% produto</div>
+        <div class="detail-sub">Estratégia de desoneração tributária</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Parcela produto (40%)</div>
+        <div class="detail-value blue" id="langonProduct">R$ 1.200.000,00</div>
+        <div class="detail-sub">Incide ICMS — base de cálculo reduzida</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Parcela serviço (60%)</div>
+        <div class="detail-value cyan" id="langonService">R$ 1.800.000,00</div>
+        <div class="detail-sub">Incide ISS municipal (2% a 5%)</div>
+      </div>
+      <div class="detail-item full">
+        <div class="split-bar">
+          <div class="service" style="width:60%;">Serviço — 60% (ISS)</div>
+          <div class="product" style="width:40%;">Produto — 40% (ICMS)</div>
+        </div>
+      </div>
+    </div>
+    <div class="strategy-box">
+      <h4>Estratégia tributária vigente</h4>
+      <p>Ao segregar 60% como serviço, a base de ICMS (e potencial ICMS-ST) cai para 40% do faturamento. A parcela de serviço paga ISS municipal (2%–5%), geralmente mais favorável. Os advogados devem avaliar se essa segregação se sustenta perante o fisco estadual, especialmente considerando que o <strong>NCM 3401.30.00</strong> está sujeito a ICMS-ST com <strong>MVA de 51,37%</strong> em diversos protocolos.</p>
+    </div>
+    <div class="tax-box">
+      <h4>Risco — ICMS-ST na saída interestadual</h4>
+      <p>Se o NCM 3401.30.00 tiver <span class="highlight">protocolo de ST</span> entre PR e os estados de destino (PE, BA, CE etc.), a Langon deve recolher o ICMS-ST antecipadamente. A base do ST seria o <span class="highlight">preço de venda + MVA 51,37%</span>. A proporção 60/40 reduz essa base, mas pode ser questionada como <span class="highlight">planejamento tributário abusivo</span>.</p>
+    </div>
+  </div>
+
+  <!-- Arrow 2 -->
+  <div class="arrow-connector">
+    <div class="arrow-line"></div>
+    <div class="arrow-label">NF-e <strong>produto</strong> (40%) + NF-e <strong>serviço</strong> (60%) · Interestadual PR → diversos · ICMS 7%/12%</div>
+    <div class="arrow-line" style="height:16px;"></div>
+    <div class="arrow-tip"></div>
+  </div>
+
+  <!-- REVENDEDORES -->
+  <div class="entity">
+    <div class="entity-header">
+      <div class="entity-icon resellers">👥</div>
+      <div>
+        <div class="entity-name">Revendedores</div>
+        <div class="entity-type">Simples Nacional — Revenda ao consumidor final</div>
+        <div class="entity-location">📍 Brasil (concentração em Pernambuco — NE)</div>
+      </div>
+    </div>
+    <div class="entity-details">
+      <div class="detail-item">
+        <div class="detail-label">Regime tributário</div>
+        <div class="detail-value green">Simples Nacional</div>
+        <div class="detail-sub">Empresas individuais com CNPJ próprio</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Concentração geográfica</div>
+        <div class="detail-value green">Pernambuco (NE)</div>
+        <div class="detail-sub">Maior volume de revendedores</div>
+      </div>
+      <div class="detail-item full">
+        <div class="detail-label">Implicação ICMS-ST</div>
+        <div class="detail-value orange" style="font-size:14px;">Revendedores do Simples não recolhem ST — ônus recai sobre a Langon (remetente)</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div class="detail-label" style="margin-bottom:8px;">Revendedores cadastrados (editável — adicione/remova abaixo)</div>
+      <div class="resellers-grid" id="resellersGrid">
+        <div class="reseller-chip"><span class="dot"></span><span class="name">Revendedor A</span><span class="loc">Recife — PE</span><button class="remove-btn" onclick="removeReseller(this)">×</button></div>
+        <div class="reseller-chip"><span class="dot"></span><span class="name">Revendedor B</span><span class="loc">Caruaru — PE</span><button class="remove-btn" onclick="removeReseller(this)">×</button></div>
+        <div class="reseller-chip"><span class="dot"></span><span class="name">Revendedor C</span><span class="loc">Salvador — BA</span><button class="remove-btn" onclick="removeReseller(this)">×</button></div>
+        <div class="reseller-chip"><span class="dot"></span><span class="name">Revendedor D</span><span class="loc">Fortaleza — CE</span><button class="remove-btn" onclick="removeReseller(this)">×</button></div>
+        <div class="reseller-chip"><span class="dot"></span><span class="name">Revendedor E</span><span class="loc">São Paulo — SP</span><button class="remove-btn" onclick="removeReseller(this)">×</button></div>
+      </div>
+      <div class="add-reseller">
+        <input type="text" id="newName" placeholder="Nome do revendedor">
+        <input type="text" id="newCity" placeholder="Cidade">
+        <input type="text" id="newState" placeholder="UF" style="max-width:60px;">
+        <button onclick="addReseller()">+ Adicionar</button>
+      </div>
+    </div>
+
+    <div class="tax-box" style="margin-top:16px;">
+      <h4>DIFAL — Diferencial de Alíquota</h4>
+      <p>Nas vendas interestaduais PR → NE/N, alíquota interestadual é <span class="highlight">7%</span>. Os estados de destino podem cobrar DIFAL (diferença entre a alíquota interna, geralmente 18%–20%, e os 7%). Verificar se os revendedores do Simples Nacional são considerados contribuintes para fins de DIFAL.</p>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ==================== TAB 2: SIMULAÇÃO ==================== -->
+<div class="tab-content" id="tab-sim">
+
+<div class="sim-table-wrap">
+
+  <!-- Resumo geral -->
+  <div class="summary-section" style="padding:0; margin-bottom:20px;">
+    <div class="summary-title">Simulação mensal — Faturamento R$ 3.000.000,00</div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="s-label">Fat. Bayonne</div>
+        <div class="s-value blue" id="sumBayonne">R$ 1,2M</div>
+        <div class="s-sub">Indústria → Langon</div>
+      </div>
+      <div class="summary-card">
+        <div class="s-label">Base ICMS</div>
+        <div class="s-value purple" id="sumIcms">R$ 1,2M</div>
+        <div class="s-sub">40% do faturamento</div>
+      </div>
+      <div class="summary-card">
+        <div class="s-label">Base ISS</div>
+        <div class="s-value cyan" id="sumIss">R$ 1,8M</div>
+        <div class="s-sub">60% do faturamento</div>
+      </div>
+      <div class="summary-card">
+        <div class="s-label">Produtos</div>
+        <div class="s-value green">117</div>
+        <div class="s-sub">SKUs ativos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ETAPA 1: Bayonne -->
+  <div class="sim-card">
+    <h3><span>🏭</span> Etapa 1 — Bayonne (Indústria → Langon)</h3>
+    <div class="info-box" style="margin-top:0; margin-bottom:16px;">
+      <h4>Parâmetros fiscais — NCM 3401.30.00</h4>
+      <p>ICMS interno PR: <strong>12%</strong> · IPI B2B: <strong>6,5%</strong> · PIS/COFINS: <strong>9,25%</strong> · MVA: <strong>51,37%</strong> · ICMS-ST destino: <strong>19,5%</strong></p>
+    </div>
+    <div class="tax-grid">
+      <div class="tax-cell">
+        <div class="t-label">Base de cálculo</div>
+        <div class="t-value blue" id="s1Base">R$ 1.200.000</div>
+        <div class="t-rate">Preço de transferência</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">ICMS próprio (12%)</div>
+        <div class="t-value red" id="s1Icms">R$ 144.000</div>
+        <div class="t-rate">Débito na saída</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">IPI (6,5%)</div>
+        <div class="t-value red" id="s1Ipi">R$ 78.000</div>
+        <div class="t-rate">Sobre preço industrial</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">PIS/COFINS (9,25%)</div>
+        <div class="t-value red" id="s1Pis">R$ 111.000</div>
+        <div class="t-rate">Não cumulativo (crédito possível)</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">Total NF Bayonne</div>
+        <div class="t-value orange" id="s1Total">R$ 1.278.000</div>
+        <div class="t-rate">Base + IPI (ICMS incluso no preço)</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">Carga tributária</div>
+        <div class="t-value yellow" id="s1Pct">27,75%</div>
+        <div class="t-rate">ICMS + IPI + PIS/COFINS s/ base</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ETAPA 2: Langon com split -->
+  <div class="sim-card">
+    <h3><span>🏢</span> Etapa 2 — Langon (Split 60/40 → Revendedores)</h3>
+
+    <div style="margin-bottom:16px;">
+      <div class="detail-label" style="margin-bottom:8px;">Cenário atual — Proporção 60% Serviço / 40% Produto</div>
+      <div class="split-bar">
+        <div class="service" style="width:60%;">Serviço 60% → ISS</div>
+        <div class="product" style="width:40%;">Produto 40% → ICMS</div>
+      </div>
+    </div>
+
+    <div class="tax-grid">
+      <div class="tax-cell">
+        <div class="t-label">Base ICMS (40%)</div>
+        <div class="t-value blue" id="s2BaseIcms">R$ 1.200.000</div>
+        <div class="t-rate">Parcela de produto</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">ICMS interestadual (7%)</div>
+        <div class="t-value red" id="s2Icms">R$ 84.000</div>
+        <div class="t-rate">PR → NE (maioria)</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">Crédito ICMS entrada</div>
+        <div class="t-value green" id="s2Credit">-R$ 144.000</div>
+        <div class="t-rate">Compra da Bayonne</div>
+      </div>
+    </div>
+    <div class="tax-grid" style="margin-top:8px;">
+      <div class="tax-cell">
+        <div class="t-label">Base ISS (60%)</div>
+        <div class="t-value cyan" id="s2BaseIss">R$ 1.800.000</div>
+        <div class="t-rate">Parcela de serviço</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">ISS (estimado 5%)</div>
+        <div class="t-value red" id="s2Iss">R$ 90.000</div>
+        <div class="t-rate">Alíquota Curitiba</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">PIS/COFINS (9,25% s/ total)</div>
+        <div class="t-value red" id="s2Pis">R$ 277.500</div>
+        <div class="t-rate">Base total R$ 3M</div>
+      </div>
+    </div>
+
+    <!-- ICMS-ST -->
+    <div class="tax-box" style="margin-top:16px;">
+      <h4>Simulação ICMS-ST (se aplicável ao NCM no destino)</h4>
+      <p style="margin-bottom:8px;">Base ST = (Preço produto + IPI) × (1 + MVA 51,37%)</p>
+    </div>
+    <div class="tax-grid" style="margin-top:8px;">
+      <div class="tax-cell">
+        <div class="t-label">Base ST (c/ MVA)</div>
+        <div class="t-value orange" id="s2BaseSt">R$ 1.816.440</div>
+        <div class="t-rate">R$ 1,2M × 1,5137</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">ICMS-ST destino (19,5%)</div>
+        <div class="t-value red" id="s2IcmsSt">R$ 354.206</div>
+        <div class="t-rate">Sobre base ST</div>
+      </div>
+      <div class="tax-cell">
+        <div class="t-label">(-) ICMS próprio já pago</div>
+        <div class="t-value green" id="s2IcmsStCredit">-R$ 84.000</div>
+        <div class="t-rate">Dedução do ICMS interestadual</div>
+      </div>
+    </div>
+    <div class="total-row" style="margin-top:12px;">
+      <div>
+        <div class="t-label">ICMS-ST a recolher (se houver protocolo)</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="t-value" id="s2StFinal">R$ 270.206</div>
+        <div class="t-pct" id="s2StPct">9,0% do faturamento total</div>
+      </div>
+    </div>
+
+    <div class="saving-row">
+      <div>
+        <div class="t-label">Economia c/ split 60/40 vs. 100% produto no ST</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="t-value" id="s2Saving">R$ 405.309</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparativo -->
+  <div class="sim-card">
+    <h3><span>⚖️</span> Comparativo — Com split vs. Sem split (100% produto)</h3>
+    <table class="fiscal-table">
+      <thead>
+        <tr>
+          <th>Tributo</th>
+          <th style="text-align:right;">Com split 60/40</th>
+          <th style="text-align:right;">Sem split (100% produto)</th>
+          <th style="text-align:right;">Economia</th>
+        </tr>
+      </thead>
+      <tbody id="compareBody">
+      </tbody>
+    </table>
+    <div class="total-row" style="margin-top:8px;">
+      <div><div class="t-label">Economia total mensal estimada</div></div>
+      <div style="text-align:right;"><div class="t-value" id="totalSaving">—</div></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ==================== TAB 3: CATÁLOGO ==================== -->
+<div class="tab-content" id="tab-products">
+<div class="fiscal-section" style="padding-top:20px; padding-bottom:40px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+    <div>
+      <div class="summary-title" style="margin-bottom:2px;">Catálogo Racco — 117 SKUs ativos</div>
+      <div style="font-size:12px; color:var(--text-dim);">NCM 3401.30.00 · Fonte: Tabela de Preço com Reversor</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="searchProducts" placeholder="Buscar produto..." oninput="filterProducts()" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;width:200px;">
+    </div>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="fiscal-table" id="productTable">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Descrição</th>
+          <th style="text-align:right;">Preço Catálogo</th>
+          <th style="text-align:right;">ICMS (12%)</th>
+          <th style="text-align:right;">IPI (6,5%)</th>
+          <th style="text-align:right;">PIS/COFINS</th>
+          <th style="text-align:right;">Valor B2B</th>
+        </tr>
+      </thead>
+      <tbody id="productBody">
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- Notes -->
+<div class="notes-section">
+  <div class="notes-box">
+    <h3>Anotações da equipe jurídica</h3>
+    <textarea placeholder="Use este espaço para anotar estratégias, riscos identificados, pontos de atenção e próximos passos..."></textarea>
+  </div>
+</div>
+
+<div class="footer">
+  Fluxo Operacional — Grupo Racco Cosméticos · Documento de trabalho para análise tributária · Abril 2026<br>
+  Parâmetros fiscais: NCM 3401.30.00 · MVA 51,37% · ICMS interno 12% · ICMS-ST 19,5% · IPI 6,5% · PIS/COFINS 9,25%
+</div>
+
+<script>
+// Product data from reversor spreadsheet
+var products = [
+  {item:"148",desc:"DEO COLONIA MALLE INTENSE",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"153",desc:"DEO COLONIA MASCULINA THESU",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"164",desc:"DEO COLONIA FEMININA KIAORA",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"177",desc:"DEO COLONIA MASCULINA OXUS",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"210",desc:"DEO COLONIA FEMININA YUNICK",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"212",desc:"DEO COLONIA FEMININA ALLUMAGE",price:179.9,icms:21.588,ipi:11.6935,pis:14.64386,b2b:157.079},
+  {item:"214",desc:"DEO COLONIA FEMININA LILAC",price:179.9,icms:21.588,ipi:11.6935,pis:14.64386,b2b:157.079},
+  {item:"221",desc:"DEO COLONIA FEMININA ORIENTAL RACCO",price:149.9,icms:17.988,ipi:9.7435,pis:12.20186,b2b:130.884},
+  {item:"222",desc:"DEO COLONIA MASCULINA ORIENTAL RACCO",price:149.9,icms:17.988,ipi:9.7435,pis:12.20186,b2b:130.884},
+  {item:"305",desc:"AGUA PERFUMADA OVERDOSE SENSUAL",price:159.9,icms:19.188,ipi:10.3935,pis:13.01586,b2b:139.616},
+  {item:"368",desc:"DEO COLONIA EMOCOES ROBERTO CARLOS",price:179.9,icms:21.588,ipi:11.6935,pis:14.64386,b2b:157.079},
+  {item:"390",desc:"DEO COLONIA LEANDRO RACCO",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"450",desc:"DEO COLONIA NU RACCO",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"915",desc:"FIBRA LIFE REFRESH CHA VERDE E LIMAO",price:69.9,icms:8.388,ipi:4.5435,pis:5.68986,b2b:61.033},
+  {item:"928",desc:"IOS COLLAGEN LIFE COLAGENO",price:154.9,icms:18.588,ipi:10.0685,pis:12.60886,b2b:135.250},
+  {item:"949",desc:"IOS ALOE LIFE SUPL. VIT C ALOE VERA",price:139.9,icms:16.788,ipi:9.0935,pis:11.38786,b2b:122.153},
+  {item:"954",desc:"IOS MAXXI 30+ EM CAPSULAS",price:139.9,icms:16.788,ipi:9.0935,pis:11.38786,b2b:122.153},
+  {item:"965",desc:"IOS COENZIMA Q10 EM CAPSULAS",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"967",desc:"IOS COFFEE ACIDO CLOROGENICO",price:109.9,icms:13.188,ipi:7.1435,pis:8.94586,b2b:95.958},
+  {item:"978",desc:"IOS ALOE LIFE VIT C LARANJA",price:139.9,icms:16.788,ipi:9.0935,pis:11.38786,b2b:122.153},
+  {item:"985",desc:"IOS OMEGA 3 (OLEO DE PEIXE)",price:129.9,icms:15.588,ipi:8.4435,pis:10.57386,b2b:113.421},
+  {item:"1000",desc:"CREME ANTITRANSPIRANTE REGULATEUR",price:29.9,icms:3.588,ipi:1.9435,pis:2.42986,b2b:26.115},
+  {item:"1002",desc:"ROLL ON REGULATEUR",price:29.9,icms:3.588,ipi:1.9435,pis:2.42986,b2b:26.115},
+  {item:"1006",desc:"SABONETE LIQ INTIMO FEMININO",price:49.9,icms:5.988,ipi:3.2435,pis:4.05786,b2b:43.579},
+  {item:"1011",desc:"REGULATEUR CREME BISNAGA",price:29.9,icms:3.588,ipi:1.9435,pis:2.42986,b2b:26.115},
+  {item:"1015",desc:"DESODORANTE INTIMO JATO SECO",price:49.9,icms:5.988,ipi:3.2435,pis:4.05786,b2b:43.579},
+  {item:"1018",desc:"GEL HIDRATANTE MASSAGEM INTIMO",price:49.9,icms:5.988,ipi:3.2435,pis:4.05786,b2b:43.579},
+  {item:"1023",desc:"GEL MASSAGEM MORANGO INTIMO",price:49.9,icms:5.988,ipi:3.2435,pis:4.05786,b2b:43.579},
+  {item:"1026",desc:"SABONETE LIQ INTIMO MORANGO",price:49.9,icms:5.988,ipi:3.2435,pis:4.05786,b2b:43.579},
+  {item:"1028",desc:"ESPUMA HIGIENE INTIMA 50ML",price:65.9,icms:7.908,ipi:4.2835,pis:5.36186,b2b:57.533},
+  {item:"1030",desc:"SABONETE LIQ INTIMO PROCTO",price:54.9,icms:6.588,ipi:3.5685,pis:4.46586,b2b:47.947},
+  {item:"1032",desc:"DESODORANTE INTIMO TEC",price:69.9,icms:8.388,ipi:4.5435,pis:5.68986,b2b:61.033},
+  {item:"1036",desc:"SPRAY PERFUMADO INTIMO MORANGO",price:43.9,icms:5.268,ipi:2.8535,pis:3.56586,b2b:38.347},
+  {item:"1045",desc:"SABONETE LIQ INTIMO 50+",price:65.9,icms:7.908,ipi:4.2835,pis:5.36186,b2b:57.533},
+  {item:"1114",desc:"HIDRATANTE OVERDOSE SUGAR DREAM",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"1115",desc:"BODY SPLASH SUGAR DREAM OVERDOSE",price:94.9,icms:11.388,ipi:6.1685,pis:7.72186,b2b:82.849},
+  {item:"1145",desc:"HIDRATANTE SECRET BERRY OVERDOSE",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"1146",desc:"BODY SPLASH SECRET BERRY OVERDOSE",price:94.9,icms:11.388,ipi:6.1685,pis:7.72186,b2b:82.849},
+  {item:"1153",desc:"DESODORANTE INTIMO JATO SECO FOR MEN",price:54.9,icms:6.588,ipi:3.5685,pis:4.46586,b2b:47.947},
+  {item:"1161",desc:"SABONETE LIQ INTIMO MASCULINO",price:49.9,icms:5.988,ipi:3.2435,pis:4.05786,b2b:43.579},
+  {item:"1185",desc:"CREME REVITALIZANTE MULTI ALOE",price:59.9,icms:7.188,ipi:3.8935,pis:4.87186,b2b:52.292},
+  {item:"1189",desc:"GEL ALOE VERA FORTIFIER 100G",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"1194",desc:"CREME DENTAL MULTI ALOE 90G",price:49.9,icms:5.988,ipi:3.2435,pis:4.05786,b2b:43.579},
+  {item:"1301",desc:"CREME PARA PES PRINCIPLES",price:32.9,icms:3.948,ipi:2.1385,pis:2.67386,b2b:28.738},
+  {item:"1307",desc:"SPRAY HIDRATACAO PES PRINCIPLES",price:59.9,icms:7.188,ipi:3.8935,pis:4.87186,b2b:52.292},
+  {item:"1345",desc:"HIDRATANTE ALGODAO MAIS PURA",price:59.9,icms:7.188,ipi:3.8935,pis:4.87186,b2b:52.292},
+  {item:"1347",desc:"SHAMPOO MAIS PURA",price:39.9,icms:4.788,ipi:2.5935,pis:3.24186,b2b:34.856},
+  {item:"1348",desc:"CONDICIONADOR MAIS PURA",price:49.9,icms:5.988,ipi:3.2435,pis:4.05786,b2b:43.579},
+  {item:"1349",desc:"SABONETE LIQUIDO MAIS PURA",price:45.9,icms:5.508,ipi:2.9835,pis:3.73386,b2b:40.105},
+  {item:"1350",desc:"HIDRATANTE KARITE MAIS PURA",price:69.9,icms:8.388,ipi:4.5435,pis:5.68986,b2b:61.033},
+  {item:"1380",desc:"SABONETE ALGAS MARINHAS ARL",price:54.9,icms:6.588,ipi:3.5685,pis:4.46586,b2b:47.947},
+  {item:"1382",desc:"SABONETE LIQ FACIAL ALGAS ARL",price:59.9,icms:7.188,ipi:3.8935,pis:4.87186,b2b:52.292},
+  {item:"1425",desc:"CREME RELAXANTE PERNAS DEFATIGANT",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"1426",desc:"OLEO RELAXANTE PERNAS DEFATIGANT",price:59.9,icms:7.188,ipi:3.8935,pis:4.87186,b2b:52.292},
+  {item:"1477",desc:"GEL SECATIVO LIPOGEL",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"1478",desc:"GEL REDUTOR OLEOSIDADE LIPOGEL",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"1481",desc:"SABONETE LIQUIDO LIPOGEL",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"1610",desc:"MOUSSE SPRAY DEPEELING",price:99.9,icms:11.988,ipi:6.4935,pis:8.12786,b2b:87.217},
+  {item:"1612",desc:"CREME DEPILATORIO DEPEELING",price:84.9,icms:10.188,ipi:5.5185,pis:6.89986,b2b:74.120},
+  {item:"1961",desc:"COLORACAO COLOR.ACTION N.1 PRETO",price:54.9,icms:6.588,ipi:3.5685,pis:4.46586,b2b:47.947},
+  {item:"3051",desc:"PROTETOR SOLAR FACIAL FPS 50 COR",price:129.9,icms:15.588,ipi:8.4435,pis:10.57386,b2b:113.421},
+  {item:"3054",desc:"PROTETOR SOLAR FACIAL FPS 70",price:99.9,icms:11.988,ipi:6.4935,pis:8.12786,b2b:87.217},
+  {item:"3057",desc:"PROTETOR SOLAR CORPORAL FPS 30",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"3059",desc:"PROTETOR SOLAR FACIAL FPS 30",price:59.9,icms:7.188,ipi:3.8935,pis:4.87186,b2b:52.292},
+  {item:"3075",desc:"S.O.S ALOE SPRAY MULTI ALOE",price:79.9,icms:9.588,ipi:5.1935,pis:6.49386,b2b:69.752},
+  {item:"4444",desc:"CONDICIONADOR RESTAURADOR",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"5501",desc:"SERUM ANTICELULITE DMAE CICLOS",price:189.9,icms:22.788,ipi:12.3435,pis:15.45786,b2b:165.812},
+  {item:"5522",desc:"HIDRATANTE FACIAL PRIORAGE 30+",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"5527",desc:"SERUM OLHOS OPTIQUE CICLOS",price:99.9,icms:11.988,ipi:6.4935,pis:8.12786,b2b:87.217},
+  {item:"5528",desc:"SERUM ACIDO HIALURONICO CICLOS",price:158.9,icms:19.068,ipi:10.3285,pis:12.93186,b2b:138.742},
+  {item:"5531",desc:"GEL CREME GLICERINA VIT E RACCODERMA",price:89.9,icms:10.788,ipi:5.8435,pis:7.30586,b2b:78.488},
+  {item:"5532",desc:"HIDRATANTE PANTENOL KARITE RACCODERMA",price:89.9,icms:10.788,ipi:5.8435,pis:7.30586,b2b:78.488},
+  {item:"5534",desc:"CREME MAOS UNHAS RACCODERMA",price:49.9,icms:5.988,ipi:3.2435,pis:4.05786,b2b:43.579},
+  {item:"5536",desc:"SERUM GLICOLICO NIACINAMIDA RACCODERMA",price:64.9,icms:7.788,ipi:4.2185,pis:5.27786,b2b:56.660},
+  {item:"5537",desc:"SERUM DMAE POLISSACARIDEOS RACCODERMA",price:65.9,icms:7.908,ipi:4.2835,pis:5.36186,b2b:57.533},
+  {item:"5538",desc:"SERUM ROSA MOSQUETA RACCODERMA",price:59.9,icms:7.188,ipi:3.8935,pis:4.87186,b2b:52.292},
+  {item:"5539",desc:"HIDRATANTE FACIAL PRIORAGE 50+",price:154.9,icms:18.588,ipi:10.0685,pis:12.60886,b2b:135.250},
+  {item:"5541",desc:"ESPUMA MICELAR PRIORAGE",price:89.9,icms:10.788,ipi:5.8435,pis:7.30586,b2b:78.488},
+  {item:"5555",desc:"SHAMPOO RESTAURADOR 250ML",price:59.9,icms:7.188,ipi:3.8935,pis:4.87186,b2b:52.292},
+  {item:"6666",desc:"MASCARA CAPILAR PREMIUM 200G",price:99.9,icms:11.988,ipi:6.4935,pis:8.12786,b2b:87.217},
+  {item:"7777",desc:"CC OIL CAPILAR 30ML",price:54.9,icms:6.588,ipi:3.5685,pis:4.46586,b2b:47.947},
+  {item:"0330",desc:"DEO COLONIA ELE SYNIC",price:179.9,icms:21.588,ipi:11.6935,pis:14.64386,b2b:157.079},
+  {item:"0331",desc:"DEO COLONIA ELA SYNIC",price:179.9,icms:21.588,ipi:11.6935,pis:14.64386,b2b:157.079},
+  {item:"5544",desc:"ESFOLIANTE CORPO BUMBUM CICLOS",price:139.9,icms:16.788,ipi:9.0935,pis:11.38786,b2b:122.153},
+  {item:"5545",desc:"HIDRATANTE CORPO BUMBUM CICLOS",price:169.9,icms:20.388,ipi:11.0435,pis:13.82986,b2b:148.347},
+  {item:"5542",desc:"SERUM ATIVADOR COLAGENO CICLOS",price:139.9,icms:16.788,ipi:9.0935,pis:11.38786,b2b:122.153},
+  {item:"5543",desc:"SERUM NANOVIT C CICLOS",price:149.9,icms:17.988,ipi:9.7435,pis:12.20186,b2b:130.884}
+];
+
+function fmt(v) { return v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtShort(v) {
+  if(v>=1e6) return 'R$ '+(v/1e6).toFixed(1).replace('.',',')+'M';
+  if(v>=1e3) return 'R$ '+(v/1e3).toFixed(0)+'K';
+  return 'R$ '+fmt(v);
+}
+function parseBRL(s) { return parseFloat(s.replace(/\./g,'').replace(',','.'))||0; }
+
+function recalculate() {
+  var total = parseBRL(document.getElementById('revenueInput').value);
+  var prod40 = total * 0.4;
+  var serv60 = total * 0.6;
+  var bayonne = prod40;
+
+  // Flow tab
+  document.getElementById('langonRevenue').textContent = 'R$ '+fmt(total);
+  document.getElementById('langonProduct').textContent = 'R$ '+fmt(prod40);
+  document.getElementById('langonService').textContent = 'R$ '+fmt(serv60);
+  document.getElementById('bayonneRevenue').textContent = 'R$ '+fmt(bayonne);
+
+  // Summary
+  document.getElementById('sumBayonne').textContent = fmtShort(bayonne);
+  document.getElementById('sumIcms').textContent = fmtShort(prod40);
+  document.getElementById('sumIss').textContent = fmtShort(serv60);
+
+  // Simulation - Bayonne
+  var s1Icms = bayonne * 0.12;
+  var s1Ipi = bayonne * 0.065;
+  var s1Pis = bayonne * 0.0925;
+  var s1Total = bayonne + s1Ipi;
+  var s1Pct = ((s1Icms + s1Ipi + s1Pis) / bayonne * 100);
+  document.getElementById('s1Base').textContent = 'R$ '+fmt(bayonne);
+  document.getElementById('s1Icms').textContent = 'R$ '+fmt(s1Icms);
+  document.getElementById('s1Ipi').textContent = 'R$ '+fmt(s1Ipi);
+  document.getElementById('s1Pis').textContent = 'R$ '+fmt(s1Pis);
+  document.getElementById('s1Total').textContent = 'R$ '+fmt(s1Total);
+  document.getElementById('s1Pct').textContent = s1Pct.toFixed(2).replace('.',',')+'%';
+
+  // Simulation - Langon COM split
+  var icmsInter = prod40 * 0.07;
+  var creditIcms = s1Icms;
+  var issLangon = serv60 * 0.05;
+  var pisLangon = total * 0.0925;
+  document.getElementById('s2BaseIcms').textContent = 'R$ '+fmt(prod40);
+  document.getElementById('s2Icms').textContent = 'R$ '+fmt(icmsInter);
+  document.getElementById('s2Credit').textContent = '-R$ '+fmt(creditIcms);
+  document.getElementById('s2BaseIss').textContent = 'R$ '+fmt(serv60);
+  document.getElementById('s2Iss').textContent = 'R$ '+fmt(issLangon);
+  document.getElementById('s2Pis').textContent = 'R$ '+fmt(pisLangon);
+
+  // ICMS-ST com split
+  var baseSt = prod40 * 1.5137;
+  var icmsSt = baseSt * 0.195;
+  var stFinal = icmsSt - icmsInter;
+  document.getElementById('s2BaseSt').textContent = 'R$ '+fmt(baseSt);
+  document.getElementById('s2IcmsSt').textContent = 'R$ '+fmt(icmsSt);
+  document.getElementById('s2IcmsStCredit').textContent = '-R$ '+fmt(icmsInter);
+  document.getElementById('s2StFinal').textContent = 'R$ '+fmt(Math.max(0,stFinal));
+  document.getElementById('s2StPct').textContent = (stFinal/total*100).toFixed(1).replace('.',',')+  '% do faturamento total';
+
+  // SEM split (100% produto)
+  var icmsInterFull = total * 0.07;
+  var baseStFull = total * 1.5137;
+  var icmsStFull = baseStFull * 0.195;
+  var stFinalFull = icmsStFull - icmsInterFull;
+  var issFull = 0;
+  var pisFull = total * 0.0925;
+
+  var saving = stFinalFull - Math.max(0,stFinal);
+  document.getElementById('s2Saving').textContent = 'R$ '+fmt(saving);
+
+  // Comparativo table
+  var rows = [
+    ['ICMS interestadual (7%)', icmsInter, icmsInterFull],
+    ['ICMS-ST a recolher', Math.max(0,stFinal), Math.max(0,stFinalFull)],
+    ['ISS (5% s/ serviço)', issLangon, issFull],
+    ['PIS/COFINS (9,25%)', pisLangon, pisFull],
+  ];
+  var totalWith = 0, totalWithout = 0;
+  var html = '';
+  rows.forEach(function(r) {
+    var diff = r[2] - r[1];
+    totalWith += r[1];
+    totalWithout += r[2];
+    html += '<tr><td>'+r[0]+'</td><td class="val" style="text-align:right;">R$ '+fmt(r[1])+'</td><td class="val" style="text-align:right;">R$ '+fmt(r[2])+'</td><td class="val '+(diff>0?'pos':'neg')+'" style="text-align:right;">'+(diff>0?'R$ '+fmt(diff):'-R$ '+fmt(Math.abs(diff)))+'</td></tr>';
+  });
+  html += '<tr style="border-top:2px solid var(--border);font-weight:700;"><td>TOTAL</td><td class="val" style="text-align:right;">R$ '+fmt(totalWith)+'</td><td class="val" style="text-align:right;">R$ '+fmt(totalWithout)+'</td><td class="val pos" style="text-align:right;">R$ '+fmt(totalWithout-totalWith)+'</td></tr>';
+  document.getElementById('compareBody').innerHTML = html;
+  document.getElementById('totalSaving').textContent = 'R$ '+fmt(totalWithout-totalWith)+' / mês';
+}
+
+// Product table
+function renderProducts(filter) {
+  var html = '';
+  var f = (filter||'').toLowerCase();
+  products.forEach(function(p) {
+    if(f && p.desc.toLowerCase().indexOf(f)===-1 && p.item.toLowerCase().indexOf(f)===-1) return;
+    html += '<tr><td class="val">'+p.item+'</td><td>'+p.desc+'</td><td class="val" style="text-align:right;">R$ '+fmt(p.price)+'</td><td style="text-align:right;color:var(--accent-red);">R$ '+fmt(p.icms)+'</td><td style="text-align:right;color:var(--accent-orange);">R$ '+fmt(p.ipi)+'</td><td style="text-align:right;color:var(--accent-purple);">R$ '+fmt(p.pis)+'</td><td class="val" style="text-align:right;">R$ '+fmt(p.b2b)+'</td></tr>';
+  });
+  document.getElementById('productBody').innerHTML = html;
+}
+function filterProducts() { renderProducts(document.getElementById('searchProducts').value); }
+
+// Tabs
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(el){el.classList.remove('active');});
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Resellers
+function addReseller() {
+  var name=document.getElementById('newName').value.trim();
+  var city=document.getElementById('newCity').value.trim();
+  var state=document.getElementById('newState').value.trim().toUpperCase();
+  if(!name||!city||!state)return;
+  var chip=document.createElement('div');
+  chip.className='reseller-chip';
+  chip.innerHTML='<span class="dot"></span><span class="name">'+name+'</span><span class="loc">'+city+' — '+state+'</span><button class="remove-btn" onclick="removeReseller(this)">×</button>';
+  document.getElementById('resellersGrid').appendChild(chip);
+  document.getElementById('newName').value='';
+  document.getElementById('newCity').value='';
+  document.getElementById('newState').value='';
+}
+function removeReseller(btn){btn.parentElement.remove();}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    if(e.target.id==='revenueInput')recalculate();
+    if(e.target.id==='newState'||e.target.id==='newCity'||e.target.id==='newName')addReseller();
+  }
+});
+
+// Init
+recalculate();
+renderProducts();
+</script>
+
+</body>
+</html>
