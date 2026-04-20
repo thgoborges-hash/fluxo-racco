@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard de Saídas — Langon | 1º Trimestre 2026</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,sans-serif;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(99,102,241,.18),transparent 55%),
+    radial-gradient(circle at 80% 90%,rgba(236,72,153,.15),transparent 55%),
+    linear-gradient(135deg,#0b1220 0%,#0f172a 55%,#0b1220 100%);
+  color:#e2e8f0;min-height:100vh;
+}
+.container{max-width:1400px;margin:0 auto;padding:32px 24px}
+.header{text-align:center;margin-bottom:18px}
+.header h1{font-size:30px;font-weight:700;letter-spacing:.3px;color:#f8fafc;margin:0 0 4px}
+.header p{color:#94a3b8;font-size:14px;margin:0}
+.header .brand{display:inline-block;padding:4px 12px;border-radius:999px;border:1px solid rgba(148,163,184,.25);color:#cbd5e1;font-size:11px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px}
+
+.period-bar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 26px}
+.period-btn{
+  padding:8px 20px;border-radius:999px;border:1px solid rgba(148,163,184,.25);
+  background:rgba(255,255,255,.04);color:#cbd5e1;font-weight:500;cursor:pointer;
+  transition:all .2s ease;backdrop-filter:blur(12px);font-size:14px;
+}
+.period-btn:hover{background:rgba(59,130,246,.15);color:#fff;border-color:rgba(59,130,246,.5)}
+.period-btn.active{
+  background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border-color:transparent;
+  box-shadow:0 4px 14px rgba(59,130,246,.35);
+}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:28px}
+.kpi{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:18px 20px;backdrop-filter:blur(18px);
+  box-shadow:0 8px 22px rgba(0,0,0,.2);
+}
+.kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#93a4bd}
+.kpi-value{font-size:24px;font-weight:700;color:#f1f5f9;margin-top:6px}
+.kpi-sub{font-size:12px;color:#64748b;margin-top:3px}
+
+.layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px;align-items:stretch}
+@media (max-width:980px){.layout{grid-template-columns:1fr}}
+
+.map-wrap{
+  position:relative;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:18px;padding:20px;min-height:580px;backdrop-filter:blur(18px);
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+#brMap{width:100%;height:560px;display:block}
+#brMap path{stroke:#0b1220;stroke-width:.8;transition:fill .25s ease, filter .2s ease;cursor:pointer}
+#brMap path:hover{filter:brightness(1.25);stroke:#f1f5f9;stroke-width:1.4}
+#brMap text.uf-label{fill:#f8fafc;font-size:11px;font-weight:600;pointer-events:none;text-anchor:middle;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+
+.map-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;text-align:center;padding:0 20px}
+
+.tooltip{
+  position:absolute;pointer-events:none;z-index:20;
+  min-width:240px;max-width:280px;
+  background:rgba(15,23,42,.95);color:#e2e8f0;
+  border:1px solid rgba(148,163,184,.3);border-radius:12px;
+  padding:12px 14px;font-size:13px;
+  backdrop-filter:blur(14px);box-shadow:0 14px 40px rgba(0,0,0,.5);
+  opacity:0;transition:opacity .15s ease;
+}
+.tooltip.visible{opacity:1}
+.tooltip h4{margin:0 0 6px;font-size:14px;color:#f8fafc}
+.tt-row{display:flex;justify-content:space-between;gap:10px;margin:2px 0;color:#cbd5e1}
+.tt-row b{color:#f1f5f9}
+.tt-top{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(148,163,184,.3)}
+.tt-top-title{font-size:11px;color:#94a3b8;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.tt-top-item{font-size:12px;color:#cbd5e1;margin:2px 0;display:flex;justify-content:space-between;gap:6px}
+
+.legend{position:absolute;bottom:26px;left:26px;right:26px;pointer-events:none}
+.legend-title{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em}
+.legend-bar{height:8px;border-radius:4px;margin-top:6px;background:linear-gradient(to right,#1e3a5f,#2563eb,#6366f1,#a855f7,#ec4899)}
+.legend-ticks{display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-top:4px}
+
+.ranking{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:18px;padding:20px;backdrop-filter:blur(18px);
+  box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;flex-direction:column;
+}
+.ranking-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.ranking-head h3{margin:0;font-size:16px;color:#f8fafc}
+.ranking-toggle{display:flex;gap:6px}
+.rank-metric{
+  padding:5px 12px;border-radius:8px;border:1px solid rgba(148,163,184,.25);
+  background:rgba(255,255,255,.03);color:#cbd5e1;font-size:12px;cursor:pointer;
+}
+.rank-metric.active{background:rgba(59,130,246,.25);color:#fff;border-color:rgba(59,130,246,.5)}
+.ranking-body{flex:1;max-height:540px;overflow:auto;padding-right:4px}
+.rank-row{
+  display:grid;grid-template-columns:30px 42px 1fr 105px;align-items:center;gap:10px;
+  padding:9px 6px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;transition:background .15s ease;
+}
+.rank-row:hover{background:rgba(255,255,255,.05)}
+.rank-row .rk-pos{color:#94a3b8;font-size:12px;text-align:right}
+.rank-row .rk-uf{font-weight:700;color:#f1f5f9}
+.rank-row .rk-bar{position:relative;height:8px;background:rgba(148,163,184,.15);border-radius:4px;overflow:hidden}
+.rank-row .rk-bar>span{display:block;height:100%;background:linear-gradient(90deg,#3b82f6,#a855f7);border-radius:4px}
+.rank-row .rk-val{text-align:right;color:#cbd5e1;font-size:13px}
+
+.footer{margin-top:22px;text-align:center;color:#64748b;font-size:11px}
+
+.st-section{margin-top:36px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:22px;backdrop-filter:blur(18px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.st-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:4px;flex-wrap:wrap}
+.st-section-head h2{margin:0;font-size:20px;color:#f8fafc}
+.st-section-sub{color:#94a3b8;font-size:13px;margin:0 0 18px}
+.st-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px}
+@media (max-width:960px){.st-grid{grid-template-columns:1fr}}
+.st-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;backdrop-filter:blur(14px)}
+.st-card h3{margin:0 0 10px;font-size:15px;color:#f1f5f9;display:flex;align-items:center;gap:8px}
+.st-card h3 .st-pill{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(59,130,246,.25);color:#dbeafe;font-weight:600;letter-spacing:.04em}
+.st-table{width:100%;border-collapse:collapse;font-size:13px}
+.st-table thead th{text-align:left;font-weight:500;color:#94a3b8;font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,.1)}
+.st-table tbody td{padding:9px 6px;border-bottom:1px solid rgba(255,255,255,.05);color:#cbd5e1;vertical-align:top}
+.st-table tbody tr:hover{background:rgba(255,255,255,.04)}
+.st-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:600;color:#f1f5f9}
+.st-desc{color:#94a3b8;font-size:12px}
+.st-num{text-align:right;color:#e2e8f0;white-space:nowrap}
+.st-num-strong{font-weight:600;color:#f1f5f9}
+.st-aliq{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(168,85,247,.2);color:#e9d5ff;font-size:11px;font-weight:600}
+.st-bar{height:6px;border-radius:3px;background:rgba(148,163,184,.12);overflow:hidden;margin-top:4px}
+.st-bar>span{display:block;height:100%;background:linear-gradient(90deg,#3b82f6,#a855f7);border-radius:3px}
+.st-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.st-summary-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 12px}
+.st-summary-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em}
+.st-summary-value{font-size:17px;font-weight:700;color:#f1f5f9;margin-top:2px}
+
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <span class="brand">Grupo Racco — Langon Cosméticos</span>
+    <h1>Dashboard de Saídas</h1>
+    <p>Faturamento, ICMS-ST e operação por estado de destino — <span id="periodLabel">1º Trimestre 2026</span></p>
+  </div>
+
+  <div class="period-bar">
+    <button class="period-btn" data-p="jan" onclick="selectPeriod('jan')">Janeiro</button>
+    <button class="period-btn" data-p="fev" onclick="selectPeriod('fev')">Fevereiro</button>
+    <button class="period-btn" data-p="mar" onclick="selectPeriod('mar')">Março</button>
+    <button class="period-btn active" data-p="tri" onclick="selectPeriod('tri')">Trimestre</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-label">Faturamento</div><div class="kpi-value" id="kpi-fat">—</div></div>
+    <div class="kpi"><div class="kpi-label">ICMS-ST</div><div class="kpi-value" id="kpi-icms">—</div></div>
+    <div class="kpi"><div class="kpi-label">Notas Fiscais</div><div class="kpi-value" id="kpi-nfs">—</div></div>
+    <div class="kpi"><div class="kpi-label">Ticket Médio</div><div class="kpi-value" id="kpi-ticket">—</div></div>
+    <div class="kpi"><div class="kpi-label">Estados atendidos</div><div class="kpi-value" id="kpi-ufs">—</div></div>
+  </div>
+
+  <div class="layout">
+    <div class="map-wrap" id="brMapWrap">
+      <svg id="brMap" viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet"></svg>
+      <div id="mapTooltip" class="tooltip"></div>
+      <div id="mapLoading" class="map-loading">Carregando mapa do Brasil…</div>
+      <div class="legend">
+        <span class="legend-title" id="legendTitle">Faturamento (R$)</span>
+        <div class="legend-bar"></div>
+        <div class="legend-ticks">
+          <span id="legMin">0</span>
+          <span id="legMid">—</span>
+          <span id="legMax">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ranking">
+      <div class="ranking-head">
+        <h3>Ranking por estado</h3>
+        <div class="ranking-toggle">
+          <button class="rank-metric active" data-metric="faturamento" onclick="selectMetric('faturamento')">Faturamento</button>
+          <button class="rank-metric" data-metric="icms_st" onclick="selectMetric('icms_st')">ICMS-ST</button>
+        </div>
+      </div>
+      <div class="ranking-body" id="rankingBody"></div>
+    </div>
+  </div>
+
+  
+  <div class="st-section" id="stSection">
+    <div class="st-section-head">
+      <h2>Resumo Tributário — ICMS-ST</h2>
+    </div>
+    <p class="st-section-sub">NCMs que geraram substituição tributária no 1º Tri/2026 e CFOPs que dispararam o recolhimento. Valores consolidados do trimestre.</p>
+
+    <div class="st-summary">
+      <div class="st-summary-item"><div class="st-summary-label">ICMS-ST total</div><div class="st-summary-value" id="stTotal">—</div></div>
+      <div class="st-summary-item"><div class="st-summary-label">Base ST total</div><div class="st-summary-value" id="stBase">—</div></div>
+      <div class="st-summary-item"><div class="st-summary-label">Itens com ST</div><div class="st-summary-value" id="stItens">—</div></div>
+      <div class="st-summary-item"><div class="st-summary-label">NCMs distintos</div><div class="st-summary-value" id="stNcmCount">—</div></div>
+      <div class="st-summary-item"><div class="st-summary-label">CFOPs distintos</div><div class="st-summary-value" id="stCfopCount">—</div></div>
+    </div>
+
+    <div class="st-grid">
+      <div class="st-card">
+        <h3>NCMs com ICMS-ST <span class="st-pill" id="stNcmBadge">—</span></h3>
+        <table class="st-table">
+          <thead>
+            <tr>
+              <th>NCM</th>
+              <th>Descrição</th>
+              <th class="st-num">Base ST</th>
+              <th class="st-num">ICMS-ST</th>
+              <th class="st-num">Alíq. ef.</th>
+            </tr>
+          </thead>
+          <tbody id="stNcmBody"></tbody>
+        </table>
+      </div>
+
+      <div class="st-card">
+        <h3>CFOPs que geram ICMS-ST <span class="st-pill" id="stCfopBadge">—</span></h3>
+        <table class="st-table">
+          <thead>
+            <tr>
+              <th>CFOP</th>
+              <th>Descrição</th>
+              <th class="st-num">Faturamento</th>
+              <th class="st-num">% Fat</th>
+              <th class="st-num">ICMS-ST</th>
+              <th class="st-num">% ST</th>
+              <th class="st-num">Itens</th>
+            </tr>
+          </thead>
+          <tbody id="stCfopBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="footer">Dados extraídos de saídas Langon (jan–mar/2026). Tooltips mostram Top 3 revendedores por estado.</div>
+</div>
+
+<script>
+const RACCO_DATA = {"periodos": {"jan": {"AL": {"faturamento": 30600.81, "icms_st": 3957.75, "num_notas": 36, "ticket_medio": 850.02, "top_revendedores": [{"nome": "INGRIDE LAIS ALVES DOS SANTOS 11395302405", "valor": 17265.61}, {"nome": "LUCINEIA SILVA - ME", "valor": 10455.56}, {"nome": "M S COSMETICOS EIRELI LTDA", "valor": 2879.64}]}, "AM": {"faturamento": 3293.6, "icms_st": 312.79, "num_notas": 14, "ticket_medio": 235.26, "top_revendedores": [{"nome": "RAIMUNDA LIMA DOS SANTOS", "valor": 1030.06}, {"nome": "SEBASTIANA RIBEIRO CARVALHO", "valor": 611.89}, {"nome": "KATIUSCIA FERREIRA MARQUES", "valor": 538.38}, {"nome": "FRANCISCO DE OLIVEIRA DA SILVA", "valor": 364.75}, {"nome": "EVANIRA AGUIAR DE SOUZA", "valor": 357.11}]}, "AP": {"faturamento": 26926.15, "icms_st": 4359.92, "num_notas": 6, "ticket_medio": 4487.69, "top_revendedores": [{"nome": "CHAGAS & CHAGAS LTDA - ME", "valor": 26926.15}]}, "BA": {"faturamento": 45231.79, "icms_st": 43.91, "num_notas": 89, "ticket_medio": 508.22, "top_revendedores": [{"nome": "BAUMGARTNER COSMETICOS EIRELI", "valor": 14986.12}, {"nome": "MARIZETI BISSOLI", "valor": 11637.2}, {"nome": "FERRARI & MATOS LTDA - ME", "valor": 7919.98}, {"nome": "MONICA SANTOS DE SANTANA 00508881536", "valor": 3205.5}, {"nome": "ITAMAR JOSE BELLO", "valor": 2555.57}]}, "CE": {"faturamento": 23992.73, "icms_st": 2542.88, "num_notas": 40, "ticket_medio": 599.82, "top_revendedores": [{"nome": "IRENILDA DA SILVA GARCIA COSMETICOS", "valor": 11632.11}, {"nome": "AC COMERCIO VAREJISTA DE COSMETICOS E PRODUTOS ALIMENTICIOS", "valor": 8236.16}, {"nome": "44.612.030 MARIA AUDILENE COSTA DE ASSIS", "valor": 2557.46}, {"nome": "M D RODRIGUES MELO EIRELI", "valor": 1567.0}]}, "DF": {"faturamento": 30795.59, "icms_st": 2585.88, "num_notas": 20, "ticket_medio": 1539.78, "top_revendedores": [{"nome": "BERIVANE DOS SANTOS MIRANDA - ME", "valor": 25247.84}, {"nome": "L N C DA SILVA COSMETICOS", "valor": 3472.57}, {"nome": "39.310.010 GILNARIA VIEIRA BARBOSA", "valor": 1690.0}, {"nome": "M L COMERCIO DISTR E REP DE COSMETICOS LTDA ME", "valor": 385.18}]}, "ES": {"faturamento": 93732.58, "icms_st": 343.49, "num_notas": 80, "ticket_medio": 1171.66, "top_revendedores": [{"nome": "D & A COSMETICOS LTDA ME", "valor": 19776.99}, {"nome": "LU COMERCIO DE COSMETICOS LTDA ME", "valor": 14964.61}, {"nome": "ROSIANI DE ALMEIDA NERY", "valor": 11300.38}, {"nome": "26.739.236 DELRYVANY FERREIRA CALLEGARI", "valor": 7486.56}, {"nome": "DINA COSMETICOS EIRELI", "valor": 7031.38}]}, "GO": {"faturamento": 17258.46, "icms_st": 96.56, "num_notas": 19, "ticket_medio": 908.34, "top_revendedores": [{"nome": "53663812 ELIZABETE CAIXETA DA SILVA", "valor": 9824.01}, {"nome": "ELIZABETH NUNES DE O. LIMA", "valor": 4384.34}, {"nome": "54.477.214 MARIA APARECIDA DE ALMEIDA", "valor": 2383.78}, {"nome": "WANDERLEIA DIAS RODRIGUES", "valor": 387.18}, {"nome": "CLEIDE PEREIRA DE MAGALHAES", "valor": 279.15}]}, "MA": {"faturamento": 35747.65, "icms_st": 319.58, "num_notas": 46, "ticket_medio": 777.12, "top_revendedores": [{"nome": "J M L DE SOUSA", "valor": 9231.38}, {"nome": "50 918 476 JUVENILDE NUNES DA SILVA", "valor": 6173.71}, {"nome": "64 316 368 RAIMUNDA NONATA SILVA BRAGA", "valor": 5271.93}, {"nome": "LETICYA PEREIRA CAMPOS DE SOUSA 00753888394", "valor": 4828.0}, {"nome": "MARIA DA CONCEICAO DA SILVA SANTOS 60779844343", "valor": 3749.8}]}, "MG": {"faturamento": 455024.31, "icms_st": 58995.79, "num_notas": 323, "ticket_medio": 1408.74, "top_revendedores": [{"nome": "CENTER VIP COMERCIO DE COSMETICOS", "valor": 71212.51}, {"nome": "FASS COSMETICOS LTDA", "valor": 52258.55}, {"nome": "ELO BRASILEIRO COSMETICOS LTDA ME", "valor": 48650.85}, {"nome": "ALVES BARBOSA COMERCIO DE COSMETICOS LTDA ME", "valor": 43364.69}, {"nome": "VIDA COSMETICOS LTDA ME", "valor": 41009.06}]}, "MS": {"faturamento": 70653.61, "icms_st": 7789.13, "num_notas": 35, "ticket_medio": 2018.67, "top_revendedores": [{"nome": "CLAUDEMIRA CALIZA S. ROCHA", "valor": 28350.62}, {"nome": "ROBERTO JOSE", "valor": 27410.09}, {"nome": "FABIANE CAMARA DE ARAUJO", "valor": 9098.31}, {"nome": "52981709 VALDIRENE MARIA DE JESUS", "valor": 5480.21}, {"nome": "VICTOR HUGO ANGOLA CADIMA", "valor": 314.38}]}, "MT": {"faturamento": 117365.72, "icms_st": 12548.58, "num_notas": 96, "ticket_medio": 1222.56, "top_revendedores": [{"nome": "FREITAS E ALMEIDA LTDA", "valor": 47045.58}, {"nome": "NIVONETH G. DA SILVA COSMETICOS ME", "valor": 25545.79}, {"nome": "PIRAMIDE COSMETICOS LTDA", "valor": 18952.26}, {"nome": "M H S DE CARVALHO", "valor": 6352.11}, {"nome": "NEUZA NOBRE E SILVA-ME", "valor": 6336.63}]}, "PA": {"faturamento": 122539.01, "icms_st": 7906.89, "num_notas": 109, "ticket_medio": 1124.21, "top_revendedores": [{"nome": "PATRICIA FERREIRA ROMEIRO COMERCIO - EPP", "valor": 28069.62}, {"nome": "QUEILOR MOISES DANIELLI", "valor": 22329.61}, {"nome": "46.429.068 RAIMUNDO RIBEIRO DA SILVA", "valor": 16534.47}, {"nome": "MARIA ELISA SOUSA E SILVA 61777650259", "valor": 11741.94}, {"nome": "I.B.DE OLIVEIRA DISTRIBUIDORA DE COSMETICOS LTDA", "valor": 9252.05}]}, "PB": {"faturamento": 67664.1, "icms_st": 5875.15, "num_notas": 86, "ticket_medio": 786.79, "top_revendedores": [{"nome": "ELZIRENE RAFAEL DE SOUZA CARVALHO ME", "valor": 16549.87}, {"nome": "TATAO COM. DE COSMETICOS LTDA", "valor": 15157.54}, {"nome": "JACILEIDE BARRETO DE ARAUJO FALCAO ME", "valor": 10594.85}, {"nome": "MARIA GABRIELLA ALMEIDA LIMA WANDERLEY", "valor": 9549.81}, {"nome": "MARIA DE LOURDES RAMOS DO NASCIMENTO ME", "valor": 5600.52}]}, "PE": {"faturamento": 93953.19, "icms_st": 0.0, "num_notas": 112, "ticket_medio": 838.87, "top_revendedores": [{"nome": "J G PINHEIRO", "valor": 17625.01}, {"nome": "NCGS COSMETICOS LTDA", "valor": 12050.27}, {"nome": "RAMOS & PEREIRA COSMETICOS E SUPLEMENTOS LTDA", "valor": 10471.48}, {"nome": "A. C. L DE ASSUNCAO PERFUMARIA COSMETICOS", "valor": 10317.88}, {"nome": "RAMOS E BRITO COMERCIO E PROMOCAO DE VENDAS LTDA", "valor": 8205.3}]}, "PI": {"faturamento": 8096.3, "icms_st": 0.0, "num_notas": 7, "ticket_medio": 1156.61, "top_revendedores": [{"nome": "60.004.788 LAURA HELENA ALVES DANIELLI", "valor": 6430.29}, {"nome": "JOICIELE LUSTOZA DE SOUSA 03172747328", "valor": 1666.01}]}, "PR": {"faturamento": 216076.85, "icms_st": 0.0, "num_notas": 160, "ticket_medio": 1350.48, "top_revendedores": [{"nome": "ERIKA KRAFT GOHL E CIA LTDA", "valor": 30475.0}, {"nome": "FORLIN & FURUKAWA COSMETICOS LTDA", "valor": 26353.71}, {"nome": "AGUIRRE DE BORTOLI E CIA LTDA", "valor": 26274.8}, {"nome": "DERMATOLEDO COSMETICOS LTDA", "valor": 22608.31}, {"nome": "RONIEV COSMETICOS LTDA", "valor": 17978.02}]}, "RJ": {"faturamento": 21262.3, "icms_st": 1731.59, "num_notas": 25, "ticket_medio": 850.49, "top_revendedores": [{"nome": "SILVEIRA E AZEVEDO COM COSM LTDA ME", "valor": 8561.49}, {"nome": "JB COSMETICOS & CIA LTDA", "valor": 6442.26}, {"nome": "ELIZABETH CRISTINA F S BIZZO EIRELI - ME", "valor": 2515.3}, {"nome": "RHP COSMETICOS EIRELI", "valor": 1540.36}, {"nome": "59.250.283 GERIVALDO MARIANO DA COSTA", "valor": 1062.87}]}, "RN": {"faturamento": 34084.01, "icms_st": 296.09, "num_notas": 40, "ticket_medio": 852.1, "top_revendedores": [{"nome": "RITA DE CASSIA GALDINO FONSECA 91277019487", "valor": 9013.91}, {"nome": "DEG TREINAMENTO E CONSULTORIA LTDA", "valor": 8411.8}, {"nome": "RAIANNY RAMOS ARRUDA EPP", "valor": 8094.71}, {"nome": "LUCIANA CRISTINA DE SOUSA LIMA ARAUJO", "valor": 5496.19}, {"nome": "AMANDA COSMETICOS LTDA", "valor": 3067.4}]}, "RO": {"faturamento": 43995.1, "icms_st": 106.24, "num_notas": 30, "ticket_medio": 1466.5, "top_revendedores": [{"nome": "RECANTO COSMETICOS LTDA", "valor": 24536.4}, {"nome": "FC COMERCIO DE COSMETICOS LTDA", "valor": 8646.5}, {"nome": "EDINEIA DE CASTRO SCHWABE", "valor": 4222.89}, {"nome": "DANIEL ROBERTO SCHLICKMANN", "valor": 2790.12}, {"nome": "LUCILENE BATISTA BEZINHO", "valor": 1944.4}]}, "RS": {"faturamento": 34733.5, "icms_st": 5361.74, "num_notas": 49, "ticket_medio": 708.85, "top_revendedores": [{"nome": "SARAI ANA GALINA", "valor": 15507.04}, {"nome": "MALIZE PETRY - ME", "valor": 8679.67}, {"nome": "TESE CENTRO DE DISTRIB DE PROD DE PERFUM LTDA", "valor": 5927.64}, {"nome": "CRISTIANE JANIR CARDOSO DOS SANTOS", "valor": 3372.17}, {"nome": "JORGE NEI PEREIRA DA SILVA", "valor": 510.79}]}, "SC": {"faturamento": 96489.7, "icms_st": 0.0, "num_notas": 92, "ticket_medio": 1048.8, "top_revendedores": [{"nome": "MARLEI COSMETICOS LTDA", "valor": 26730.59}, {"nome": "LUANA MONTIBELLER REIS", "valor": 13859.66}, {"nome": "VANDERLEI SLONGO JUNIOR 10549228969", "valor": 11688.5}, {"nome": "CHAGIA COMERCIAL DE COSMETICOS LTDA ME", "valor": 8263.28}, {"nome": "H J FISCHER ME", "valor": 8180.45}]}, "SE": {"faturamento": 2999.34, "icms_st": 0.0, "num_notas": 3, "ticket_medio": 999.78, "top_revendedores": [{"nome": "54.196.572 GENARIO DOS SANTOS", "valor": 2999.34}]}, "SP": {"faturamento": 892509.81, "icms_st": 97206.03, "num_notas": 270, "ticket_medio": 3305.59, "top_revendedores": [{"nome": "AL DE ALMEIDA JUNIOR EIRELI", "valor": 304999.99}, {"nome": "WALTER LUIZ STURARO JUNIOR - ME", "valor": 171853.11}, {"nome": "JANAINA CAUMO COSMETICOS LTDA", "valor": 57250.04}, {"nome": "HELENA AMBROSIO", "valor": 49676.31}, {"nome": "AJI COMERCIO E ESTETICA LTDA", "valor": 47054.48}]}, "TO": {"faturamento": 1182.9, "icms_st": 183.42, "num_notas": 2, "ticket_medio": 591.45, "top_revendedores": [{"nome": "ALESSANDRA MARTINS CORREIA", "valor": 938.38}, {"nome": "ERICA SANTOS MACHADO", "valor": 244.52}]}}, "fev": {"AC": {"faturamento": 314.38, "icms_st": 24.75, "num_notas": 2, "ticket_medio": 157.19, "top_revendedores": [{"nome": "ROSANGELA MARIA MARTINS DA SILVA", "valor": 314.38}]}, "AL": {"faturamento": 47280.95, "icms_st": 5874.75, "num_notas": 45, "ticket_medio": 1050.69, "top_revendedores": [{"nome": "INGRIDE LAIS ALVES DOS SANTOS 11395302405", "valor": 26251.77}, {"nome": "LUCINEIA SILVA - ME", "valor": 11496.22}, {"nome": "M S COSMETICOS EIRELI LTDA", "valor": 9532.96}]}, "AM": {"faturamento": 3719.45, "icms_st": 360.88, "num_notas": 11, "ticket_medio": 338.13, "top_revendedores": [{"nome": "LILIANE DA SILVA PEREIRA", "valor": 1716.05}, {"nome": "DANIELE MEDEIROS DOS SANTOS GUSMAO", "valor": 711.2}, {"nome": "FRANCISCO DE OLIVEIRA DA SILVA", "valor": 500.31}, {"nome": "MARIA ROSINEIRE PACHECO SABOIA", "valor": 399.51}, {"nome": "EVANIRA AGUIAR DE SOUZA", "valor": 357.38}]}, "AP": {"faturamento": 5591.37, "icms_st": 516.12, "num_notas": 5, "ticket_medio": 1118.27, "top_revendedores": [{"nome": "CHAGAS & CHAGAS LTDA - ME", "valor": 5591.37}]}, "BA": {"faturamento": 155122.13, "icms_st": 106.14, "num_notas": 67, "ticket_medio": 2315.26, "top_revendedores": [{"nome": "42.944.895 DANIELE COSTA LIMA", "valor": 60024.5}, {"nome": "MARIZETI BISSOLI", "valor": 48542.05}, {"nome": "BAUMGARTNER COSMETICOS EIRELI", "valor": 10857.02}, {"nome": "FERRARI & MATOS LTDA - ME", "valor": 10412.71}, {"nome": "MONICA SANTOS DE SANTANA 00508881536", "valor": 6025.92}]}, "CE": {"faturamento": 26952.88, "icms_st": 2644.23, "num_notas": 62, "ticket_medio": 434.72, "top_revendedores": [{"nome": "IRENILDA DA SILVA GARCIA COSMETICOS", "valor": 11825.66}, {"nome": "M D RODRIGUES MELO EIRELI", "valor": 6499.66}, {"nome": "44.612.030 MARIA AUDILENE COSTA DE ASSIS", "valor": 5258.02}, {"nome": "CLAUDIA VERONICA UCHOA PINHO 83526455368", "valor": 3068.82}, {"nome": "MARIA CAMILA BARBOSA FERNANDES", "valor": 300.72}]}, "DF": {"faturamento": 30928.82, "icms_st": 2726.16, "num_notas": 38, "ticket_medio": 813.92, "top_revendedores": [{"nome": "BERIVANE DOS SANTOS MIRANDA - ME", "valor": 26695.78}, {"nome": "L N C DA SILVA COSMETICOS", "valor": 2867.24}, {"nome": "39.310.010 GILNARIA VIEIRA BARBOSA", "valor": 1000.83}, {"nome": "M L COMERCIO DISTR E REP DE COSMETICOS LTDA ME", "valor": 364.97}]}, "ES": {"faturamento": 160762.86, "icms_st": 284.22, "num_notas": 112, "ticket_medio": 1435.38, "top_revendedores": [{"nome": "JULIANA GERHARDT", "valor": 32979.94}, {"nome": "26.739.236 DELRYVANY FERREIRA CALLEGARI", "valor": 30041.34}, {"nome": "D & A COSMETICOS LTDA ME", "valor": 16501.47}, {"nome": "ROSIANI DE ALMEIDA NERY", "valor": 15943.8}, {"nome": "DINA COSMETICOS EIRELI", "valor": 9863.78}]}, "GO": {"faturamento": 16518.05, "icms_st": 64.37, "num_notas": 20, "ticket_medio": 825.9, "top_revendedores": [{"nome": "53663812 ELIZABETE CAIXETA DA SILVA", "valor": 13909.78}, {"nome": "KENIA ANDRADE DUARTE 78023297104", "valor": 1958.79}, {"nome": "JOELMA DA CRUZ CAMPOS", "valor": 649.48}]}, "MA": {"faturamento": 41266.16, "icms_st": 668.68, "num_notas": 59, "ticket_medio": 699.43, "top_revendedores": [{"nome": "LETICYA PEREIRA CAMPOS DE SOUSA 00753888394", "valor": 13786.32}, {"nome": "MARIA DA CONCEICAO DA SILVA SANTOS 60779844343", "valor": 8229.74}, {"nome": "THIAGO JEFFERSON DA COSTA ALMEIDA", "valor": 4801.67}, {"nome": "50 918 476 JUVENILDE NUNES DA SILVA", "valor": 4053.31}, {"nome": "64 316 368 RAIMUNDA NONATA SILVA BRAGA", "valor": 3679.6}]}, "MG": {"faturamento": 389583.09, "icms_st": 50404.84, "num_notas": 361, "ticket_medio": 1079.18, "top_revendedores": [{"nome": "KEILA SILVA CABRAL - ME", "valor": 70408.78}, {"nome": "VIDA COSMETICOS LTDA ME", "valor": 38928.94}, {"nome": "54.338.457 MARIA JOSE TOLENTINO DE ARAUJO", "valor": 21494.85}, {"nome": "55.249.985 VERENICE LUCIMAR LOPES PRETTI", "valor": 17253.55}, {"nome": "MELLO COSMETICOS LTDA ME", "valor": 15214.58}]}, "MS": {"faturamento": 64478.05, "icms_st": 6102.1, "num_notas": 58, "ticket_medio": 1111.69, "top_revendedores": [{"nome": "CLAUDEMIRA CALIZA S. ROCHA", "valor": 28902.44}, {"nome": "ROBERTO JOSE", "valor": 17708.28}, {"nome": "52981709 VALDIRENE MARIA DE JESUS", "valor": 8613.58}, {"nome": "FABIANE CAMARA DE ARAUJO", "valor": 8159.02}, {"nome": "LETHYCIA SILVEIRA SANCHES", "valor": 1094.73}]}, "MT": {"faturamento": 126371.84, "icms_st": 12959.33, "num_notas": 162, "ticket_medio": 780.07, "top_revendedores": [{"nome": "FREITAS E ALMEIDA LTDA", "valor": 52433.35}, {"nome": "NIVONETH G. DA SILVA COSMETICOS ME", "valor": 26027.45}, {"nome": "M H S DE CARVALHO", "valor": 20245.55}, {"nome": "PIRAMIDE COSMETICOS LTDA", "valor": 20166.8}, {"nome": "JAIR CAIRES PINHEIRO 36192104115", "valor": 3144.56}]}, "PA": {"faturamento": 88311.77, "icms_st": 7433.67, "num_notas": 135, "ticket_medio": 654.16, "top_revendedores": [{"nome": "QUEILOR MOISES DANIELLI", "valor": 24706.67}, {"nome": "A C F SOUSA COMERCIO ME", "valor": 12347.4}, {"nome": "PATRICIA FERREIRA ROMEIRO COMERCIO - EPP", "valor": 11954.42}, {"nome": "MARTINS R. FREITAS", "valor": 9025.22}, {"nome": "MARIA ELISA SOUSA E SILVA 61777650259", "valor": 5360.76}]}, "PB": {"faturamento": 129856.42, "icms_st": 11273.24, "num_notas": 167, "ticket_medio": 777.58, "top_revendedores": [{"nome": "ELZIRENE RAFAEL DE SOUZA CARVALHO ME", "valor": 26335.97}, {"nome": "MARIA GABRIELLA ALMEIDA LIMA WANDERLEY", "valor": 23943.57}, {"nome": "TATAO COM. DE COSMETICOS LTDA", "valor": 18058.15}, {"nome": "ALCIONE ARRUDA SILVA 01121834418", "valor": 12699.93}, {"nome": "JACILEIDE BARRETO DE ARAUJO FALCAO ME", "valor": 12296.38}]}, "PE": {"faturamento": 162018.96, "icms_st": 49.98, "num_notas": 163, "ticket_medio": 993.98, "top_revendedores": [{"nome": "RAMOS & PEREIRA COSMETICOS E SUPLEMENTOS LTDA", "valor": 30366.19}, {"nome": "MJ MENEZES COSMETICOS LTDA", "valor": 23622.35}, {"nome": "J G PINHEIRO", "valor": 15783.34}, {"nome": "RAMOS E BRITO COMERCIO E PROMOCAO DE VENDAS LTDA", "valor": 13164.4}, {"nome": "NCGS COSMETICOS LTDA", "valor": 12439.15}]}, "PI": {"faturamento": 30437.24, "icms_st": 0.0, "num_notas": 8, "ticket_medio": 3804.66, "top_revendedores": [{"nome": "60.004.788 LAURA HELENA ALVES DANIELLI", "valor": 30437.24}]}, "PR": {"faturamento": 494259.13, "icms_st": 0.0, "num_notas": 213, "ticket_medio": 2320.47, "top_revendedores": [{"nome": "BASTON INDUSTRIA DE AEROSSOIS LTDA", "valor": 300000.0}, {"nome": "FORLIN & FURUKAWA COSMETICOS LTDA", "valor": 39884.89}, {"nome": "RONIEV COSMETICOS LTDA", "valor": 19727.14}, {"nome": "ERIKA KRAFT GOHL E CIA LTDA", "valor": 14991.29}, {"nome": "GERALDO DA SILVA DE SALES - ME", "valor": 14450.1}]}, "RJ": {"faturamento": 46961.44, "icms_st": 2793.81, "num_notas": 20, "ticket_medio": 2348.07, "top_revendedores": [{"nome": "SILVEIRA E AZEVEDO COM COSM LTDA ME", "valor": 16559.99}, {"nome": "ELIZABETH CRISTINA F S BIZZO EIRELI - ME", "valor": 13873.3}, {"nome": "KCA COM COSM E PERFUMARIA LTDA", "valor": 6347.9}, {"nome": "JB COSMETICOS & CIA LTDA", "valor": 4168.76}, {"nome": "MIG DOS LAGOS COMERCIO DE COSMET LTDA", "valor": 3116.49}]}, "RN": {"faturamento": 23593.57, "icms_st": 145.61, "num_notas": 51, "ticket_medio": 462.62, "top_revendedores": [{"nome": "LUCIANA CRISTINA DE SOUSA LIMA ARAUJO", "valor": 6889.02}, {"nome": "RITA DE CASSIA GALDINO FONSECA 91277019487", "valor": 6289.39}, {"nome": "DEG TREINAMENTO E CONSULTORIA LTDA", "valor": 4230.04}, {"nome": "54.521.260 LUIZ MARCELINO DE SOUZA FILHO", "valor": 3518.22}, {"nome": "RAIANNY RAMOS ARRUDA EPP", "valor": 2666.9}]}, "RO": {"faturamento": 76783.86, "icms_st": 216.39, "num_notas": 60, "ticket_medio": 1279.73, "top_revendedores": [{"nome": "RECANTO COSMETICOS LTDA", "valor": 43945.87}, {"nome": "SILVANA MARINHO DA SILVA", "valor": 13310.15}, {"nome": "FC COMERCIO DE COSMETICOS LTDA", "valor": 10713.75}, {"nome": "DANIEL ROBERTO SCHLICKMANN", "valor": 2578.14}, {"nome": "LUCILENE BATISTA BEZINHO", "valor": 2155.3}]}, "RR": {"faturamento": 724.66, "icms_st": 70.16, "num_notas": 3, "ticket_medio": 241.55, "top_revendedores": [{"nome": "MARIA DO SOCORRO RABELO NOBRE", "valor": 624.48}, {"nome": "SOLANGE ZANUTO CAMARGO", "valor": 100.18}]}, "RS": {"faturamento": 35706.29, "icms_st": 4475.45, "num_notas": 52, "ticket_medio": 686.66, "top_revendedores": [{"nome": "SARAI ANA GALINA", "valor": 19323.59}, {"nome": "MALIZE PETRY - ME", "valor": 13654.98}, {"nome": "63.049.680 MIRIAM BRUN KIELING", "valor": 1673.1}, {"nome": "MARA REGINA PEREIRA DA SILVA", "valor": 506.36}, {"nome": "JORGE NEI PEREIRA DA SILVA", "valor": 503.81}]}, "SC": {"faturamento": 94771.85, "icms_st": 0.0, "num_notas": 121, "ticket_medio": 783.24, "top_revendedores": [{"nome": "MARLEI COSMETICOS LTDA", "valor": 27103.36}, {"nome": "VANDERLEI SLONGO JUNIOR 10549228969", "valor": 8539.16}, {"nome": "QVA DISTRIBUIDORA LTDA EPP", "valor": 7992.01}, {"nome": "CHAGIA COMERCIAL DE COSMETICOS LTDA ME", "valor": 7637.69}, {"nome": "TEREZA CIELUSINSKI 41820746968", "valor": 6968.09}]}, "SE": {"faturamento": 7817.95, "icms_st": 0.0, "num_notas": 7, "ticket_medio": 1116.85, "top_revendedores": [{"nome": "MARIA JOSE OLIVEIRA SANTOS JOELMA ME", "valor": 5186.09}, {"nome": "54.196.881 SILVIA SILVA MECENAS SANTOS", "valor": 2631.86}]}, "SP": {"faturamento": 484795.39, "icms_st": 43495.79, "num_notas": 321, "ticket_medio": 1510.27, "top_revendedores": [{"nome": "JANAINA CAUMO COSMETICOS LTDA", "valor": 86636.68}, {"nome": "LAY COMERCIO DE PRODUTOS LTDA", "valor": 40403.0}, {"nome": "WALTER LUIZ STURARO JUNIOR - ME", "valor": 37562.42}, {"nome": "HELENA AMBROSIO", "valor": 35046.87}, {"nome": "RS SILVA VENDA DE VESTUARIO E COSMETICOS LTDA", "valor": 30700.52}]}, "TO": {"faturamento": 1574.92, "icms_st": 135.54, "num_notas": 3, "ticket_medio": 524.97, "top_revendedores": [{"nome": "EUNICE ALVES PEREIRA", "valor": 1467.06}, {"nome": "ERICA SANTOS MACHADO", "valor": 107.86}]}}, "mar": {"AC": {"faturamento": 23824.07, "icms_st": 1108.08, "num_notas": 10, "ticket_medio": 2382.41, "top_revendedores": [{"nome": "CARLOS ERNESTO BUSTAMANTE PACHERRES 53684834220", "valor": 22314.5}, {"nome": "DYHELEN MENEZES BUSTAMANTE CAVALCANTE", "valor": 1509.57}]}, "AL": {"faturamento": 57748.16, "icms_st": 8459.94, "num_notas": 56, "ticket_medio": 1031.22, "top_revendedores": [{"nome": "INGRIDE LAIS ALVES DOS SANTOS 11395302405", "valor": 25078.5}, {"nome": "M S COSMETICOS EIRELI LTDA", "valor": 15404.19}, {"nome": "LUCINEIA SILVA - ME", "valor": 12294.85}, {"nome": "L I SILVA COMERCIO", "valor": 4970.62}]}, "AM": {"faturamento": 2205.21, "icms_st": 213.6, "num_notas": 6, "ticket_medio": 367.54, "top_revendedores": [{"nome": "DANIELE MEDEIROS DOS SANTOS GUSMAO", "valor": 1181.74}, {"nome": "EVANIRA AGUIAR DE SOUZA", "valor": 521.76}, {"nome": "FRANCISCO DE OLIVEIRA DA SILVA", "valor": 501.71}]}, "AP": {"faturamento": 10002.31, "icms_st": 288.05, "num_notas": 4, "ticket_medio": 2500.58, "top_revendedores": [{"nome": "CHAGAS & CHAGAS LTDA - ME", "valor": 10002.31}]}, "BA": {"faturamento": 46240.23, "icms_st": 106.66, "num_notas": 97, "ticket_medio": 476.7, "top_revendedores": [{"nome": "42.944.895 DANIELE COSTA LIMA", "valor": 10442.42}, {"nome": "BAUMGARTNER COSMETICOS EIRELI", "valor": 6705.03}, {"nome": "MONICA SANTOS DE SANTANA 00508881536", "valor": 6263.52}, {"nome": "FERRARI & MATOS LTDA - ME", "valor": 6186.62}, {"nome": "52.290.660 ELAINE DE LIMA ALVES", "valor": 4009.13}]}, "CE": {"faturamento": 46632.78, "icms_st": 4394.12, "num_notas": 60, "ticket_medio": 777.21, "top_revendedores": [{"nome": "AC COMERCIO VAREJISTA DE COSMETICOS E PRODUTOS ALIMENTICIOS", "valor": 16988.09}, {"nome": "IRENILDA DA SILVA GARCIA COSMETICOS", "valor": 14580.86}, {"nome": "44.612.030 MARIA AUDILENE COSTA DE ASSIS", "valor": 6095.55}, {"nome": "M D RODRIGUES MELO EIRELI", "valor": 5184.52}, {"nome": "CLAUDIA VERONICA UCHOA PINHO 83526455368", "valor": 3783.76}]}, "DF": {"faturamento": 17415.7, "icms_st": 1655.99, "num_notas": 29, "ticket_medio": 600.54, "top_revendedores": [{"nome": "BERIVANE DOS SANTOS MIRANDA - ME", "valor": 14103.39}, {"nome": "L N C DA SILVA COSMETICOS", "valor": 3026.82}, {"nome": "39.310.010 GILNARIA VIEIRA BARBOSA", "valor": 285.49}]}, "ES": {"faturamento": 230515.68, "icms_st": 241.69, "num_notas": 178, "ticket_medio": 1295.03, "top_revendedores": [{"nome": "JULIANA GERHARDT", "valor": 52669.88}, {"nome": "D & A COSMETICOS LTDA ME", "valor": 37793.74}, {"nome": "LU COMERCIO DE COSMETICOS LTDA ME", "valor": 23394.45}, {"nome": "26.739.236 DELRYVANY FERREIRA CALLEGARI", "valor": 19464.79}, {"nome": "K & J COSMETICOS LTDA ME", "valor": 17633.24}]}, "GO": {"faturamento": 15853.07, "icms_st": 35.35, "num_notas": 27, "ticket_medio": 587.15, "top_revendedores": [{"nome": "53663812 ELIZABETE CAIXETA DA SILVA", "valor": 12166.8}, {"nome": "54.477.214 MARIA APARECIDA DE ALMEIDA", "valor": 2435.39}, {"nome": "KENIA ANDRADE DUARTE 78023297104", "valor": 962.03}, {"nome": "ALVAIR CLAUDINA DOS SANTOS PEREIRA", "valor": 288.85}]}, "MA": {"faturamento": 17985.91, "icms_st": 341.05, "num_notas": 26, "ticket_medio": 691.77, "top_revendedores": [{"nome": "J M L DE SOUSA", "valor": 4270.62}, {"nome": "LETICYA PEREIRA CAMPOS DE SOUSA 00753888394", "valor": 2102.89}, {"nome": "THIAGO JEFFERSON DA COSTA ALMEIDA", "valor": 1818.24}, {"nome": "54 197 690 MARIA DOS ANJOS DA SILVA", "valor": 1800.89}, {"nome": "50 918 476 JUVENILDE NUNES DA SILVA", "valor": 1761.85}]}, "MG": {"faturamento": 428676.94, "icms_st": 58193.67, "num_notas": 381, "ticket_medio": 1125.14, "top_revendedores": [{"nome": "ALVES BARBOSA COMERCIO DE COSMETICOS LTDA ME", "valor": 62107.7}, {"nome": "DIAMOND REVENDAS LTDA", "valor": 41976.9}, {"nome": "VIDA COSMETICOS LTDA ME", "valor": 23553.11}, {"nome": "CENTER VIP COMERCIO DE COSMETICOS", "valor": 18041.64}, {"nome": "FASS COSMETICOS LTDA", "valor": 17483.67}]}, "MS": {"faturamento": 50210.75, "icms_st": 4656.25, "num_notas": 83, "ticket_medio": 604.95, "top_revendedores": [{"nome": "ROBERTO JOSE", "valor": 26256.12}, {"nome": "CLAUDEMIRA CALIZA S. ROCHA", "valor": 12793.84}, {"nome": "FABIANE CAMARA DE ARAUJO", "valor": 10768.32}, {"nome": "MARIA SILVANA TOCALE SUAREZ", "valor": 392.47}]}, "MT": {"faturamento": 130348.43, "icms_st": 14775.11, "num_notas": 160, "ticket_medio": 814.68, "top_revendedores": [{"nome": "FREITAS E ALMEIDA LTDA", "valor": 75315.31}, {"nome": "NIVONETH G. DA SILVA COSMETICOS ME", "valor": 20201.56}, {"nome": "PIRAMIDE COSMETICOS LTDA", "valor": 11165.47}, {"nome": "JAIR CAIRES PINHEIRO 36192104115", "valor": 6539.1}, {"nome": "REGIANE SCHEEL 01902627105", "valor": 6072.38}]}, "PA": {"faturamento": 100261.67, "icms_st": 9739.75, "num_notas": 132, "ticket_medio": 759.56, "top_revendedores": [{"nome": "PATRICIA FERREIRA ROMEIRO COMERCIO - EPP", "valor": 25582.65}, {"nome": "JOSUE G LIMA LTDA", "valor": 20862.93}, {"nome": "MARIA ELISA SOUSA E SILVA 61777650259", "valor": 11955.8}, {"nome": "65.320.448 NELISVANIA LUZ DOS SANTOS OLIVEIRA", "valor": 10466.76}, {"nome": "QUEILOR MOISES DANIELLI", "valor": 6782.2}]}, "PB": {"faturamento": 93060.48, "icms_st": 8759.74, "num_notas": 169, "ticket_medio": 550.65, "top_revendedores": [{"nome": "ELZIRENE RAFAEL DE SOUZA CARVALHO ME", "valor": 22161.56}, {"nome": "TATAO COM. DE COSMETICOS LTDA", "valor": 19608.65}, {"nome": "MARIA GABRIELLA ALMEIDA LIMA WANDERLEY", "valor": 15420.7}, {"nome": "JACILEIDE BARRETO DE ARAUJO FALCAO ME", "valor": 12798.91}, {"nome": "GISLIANA PEREIRA BARRETO", "valor": 6723.94}]}, "PE": {"faturamento": 142330.64, "icms_st": 0.0, "num_notas": 201, "ticket_medio": 708.11, "top_revendedores": [{"nome": "RAMOS & PEREIRA COSMETICOS E SUPLEMENTOS LTDA", "valor": 32940.09}, {"nome": "NCGS COSMETICOS LTDA", "valor": 18215.48}, {"nome": "A. C. L DE ASSUNCAO PERFUMARIA COSMETICOS", "valor": 15611.28}, {"nome": "D S COSMETICOS EIRELI", "valor": 10983.48}, {"nome": "J G PINHEIRO", "valor": 9450.37}]}, "PI": {"faturamento": 13052.67, "icms_st": 0.0, "num_notas": 18, "ticket_medio": 725.15, "top_revendedores": [{"nome": "60.004.788 LAURA HELENA ALVES DANIELLI", "valor": 8550.84}, {"nome": "51.151.834 EVANILDA MARIA DE OLIVEIRA", "valor": 2890.25}, {"nome": "JOICIELE LUSTOZA DE SOUSA 03172747328", "valor": 1611.58}]}, "PR": {"faturamento": 203280.7, "icms_st": 0.0, "num_notas": 217, "ticket_medio": 936.78, "top_revendedores": [{"nome": "GERALDO DA SILVA DE SALES - ME", "valor": 37000.0}, {"nome": "RONIEV COSMETICOS LTDA", "valor": 32036.89}, {"nome": "ERIKA KRAFT GOHL E CIA LTDA", "valor": 23496.33}, {"nome": "FORLIN & FURUKAWA COSMETICOS LTDA", "valor": 20685.93}, {"nome": "BELEZA E BEM ESTAR LTDA", "valor": 17762.67}]}, "RJ": {"faturamento": 39882.83, "icms_st": 3105.22, "num_notas": 24, "ticket_medio": 1661.78, "top_revendedores": [{"nome": "RHP COSMETICOS EIRELI", "valor": 10175.75}, {"nome": "KCA COM COSM E PERFUMARIA LTDA", "valor": 9923.05}, {"nome": "SILVEIRA E AZEVEDO COM COSM LTDA ME", "valor": 7448.82}, {"nome": "ELIZABETH CRISTINA F S BIZZO EIRELI - ME", "valor": 5086.45}, {"nome": "JB COSMETICOS & CIA LTDA", "valor": 4515.86}]}, "RN": {"faturamento": 45515.67, "icms_st": 5.23, "num_notas": 89, "ticket_medio": 511.41, "top_revendedores": [{"nome": "RITA DE CASSIA GALDINO FONSECA 91277019487", "valor": 15814.36}, {"nome": "RAIANNY RAMOS ARRUDA EPP", "valor": 13900.4}, {"nome": "LUCIANA CRISTINA DE SOUSA LIMA ARAUJO", "valor": 9413.96}, {"nome": "DEG TREINAMENTO E CONSULTORIA LTDA", "valor": 4520.29}, {"nome": "54.521.260 LUIZ MARCELINO DE SOUZA FILHO", "valor": 1866.66}]}, "RO": {"faturamento": 50428.92, "icms_st": 0.0, "num_notas": 97, "ticket_medio": 519.89, "top_revendedores": [{"nome": "RECANTO COSMETICOS LTDA", "valor": 24457.08}, {"nome": "DANIEL ROBERTO SCHLICKMANN", "valor": 9236.45}, {"nome": "FC COMERCIO DE COSMETICOS LTDA", "valor": 6774.43}, {"nome": "EDINEIA DE CASTRO SCHWABE", "valor": 3869.03}, {"nome": "LUCILENE BATISTA BEZINHO", "valor": 3765.38}]}, "RR": {"faturamento": 566.09, "icms_st": 64.02, "num_notas": 2, "ticket_medio": 283.04, "top_revendedores": [{"nome": "RAMIRO GOUVEIA DE ANDRADE", "valor": 566.09}]}, "RS": {"faturamento": 26153.04, "icms_st": 3593.96, "num_notas": 41, "ticket_medio": 637.88, "top_revendedores": [{"nome": "SARAI ANA GALINA", "valor": 18630.18}, {"nome": "MALIZE PETRY - ME", "valor": 5298.55}, {"nome": "TESE CENTRO DE DISTRIB DE PROD DE PERFUM LTDA", "valor": 828.47}, {"nome": "MARA REGINA PEREIRA DA SILVA", "valor": 500.67}, {"nome": "JORGE NEI PEREIRA DA SILVA", "valor": 500.28}]}, "SC": {"faturamento": 148188.37, "icms_st": 0.0, "num_notas": 149, "ticket_medio": 994.55, "top_revendedores": [{"nome": "ITAPEMA BEACH HOTEIS S.A", "valor": 32287.72}, {"nome": "H J FISCHER ME", "valor": 20283.86}, {"nome": "MARLEI COSMETICOS LTDA", "valor": 17490.78}, {"nome": "VANDERLEI SLONGO JUNIOR 10549228969", "valor": 14742.29}, {"nome": "CHAGIA COMERCIAL DE COSMETICOS LTDA ME", "valor": 12250.72}]}, "SE": {"faturamento": 3220.58, "icms_st": 0.0, "num_notas": 3, "ticket_medio": 1073.53, "top_revendedores": [{"nome": "54.196.572 GENARIO DOS SANTOS", "valor": 3185.58}, {"nome": "MARIA JOSE OLIVEIRA SANTOS JOELMA ME", "valor": 35.0}]}, "SP": {"faturamento": 649134.89, "icms_st": 65574.82, "num_notas": 343, "ticket_medio": 1892.52, "top_revendedores": [{"nome": "WALTER LUIZ STURARO JUNIOR - ME", "valor": 114774.51}, {"nome": "RS SILVA VENDA DE VESTUARIO E COSMETICOS LTDA", "valor": 69642.02}, {"nome": "J. F. MIGUEL COSMETICOS E ALIMETICIOS", "valor": 69048.57}, {"nome": "AJI COMERCIO E ESTETICA LTDA", "valor": 65695.14}, {"nome": "JANAINA CAUMO COSMETICOS LTDA", "valor": 59649.37}]}}, "tri": {"AC": {"faturamento": 24138.45, "icms_st": 1132.83, "num_notas": 12, "ticket_medio": 2011.54, "top_revendedores": [{"nome": "CARLOS ERNESTO BUSTAMANTE PACHERRES 53684834220", "valor": 22314.5}, {"nome": "DYHELEN MENEZES BUSTAMANTE CAVALCANTE", "valor": 1509.57}, {"nome": "ROSANGELA MARIA MARTINS DA SILVA", "valor": 314.38}]}, "AL": {"faturamento": 135629.92, "icms_st": 18292.44, "num_notas": 137, "ticket_medio": 990.0, "top_revendedores": [{"nome": "INGRIDE LAIS ALVES DOS SANTOS 11395302405", "valor": 68595.88}, {"nome": "LUCINEIA SILVA - ME", "valor": 34246.63}, {"nome": "M S COSMETICOS EIRELI LTDA", "valor": 27816.79}, {"nome": "L I SILVA COMERCIO", "valor": 4970.62}]}, "AM": {"faturamento": 9218.26, "icms_st": 887.27, "num_notas": 31, "ticket_medio": 297.36, "top_revendedores": [{"nome": "DANIELE MEDEIROS DOS SANTOS GUSMAO", "valor": 1892.94}, {"nome": "LILIANE DA SILVA PEREIRA", "valor": 1716.05}, {"nome": "FRANCISCO DE OLIVEIRA DA SILVA", "valor": 1366.77}, {"nome": "EVANIRA AGUIAR DE SOUZA", "valor": 1236.25}, {"nome": "RAIMUNDA LIMA DOS SANTOS", "valor": 1030.06}]}, "AP": {"faturamento": 42519.83, "icms_st": 5164.09, "num_notas": 15, "ticket_medio": 2834.66, "top_revendedores": [{"nome": "CHAGAS & CHAGAS LTDA - ME", "valor": 42519.83}]}, "BA": {"faturamento": 246594.15, "icms_st": 256.71, "num_notas": 253, "ticket_medio": 974.68, "top_revendedores": [{"nome": "42.944.895 DANIELE COSTA LIMA", "valor": 70466.92}, {"nome": "MARIZETI BISSOLI", "valor": 63936.02}, {"nome": "BAUMGARTNER COSMETICOS EIRELI", "valor": 32548.17}, {"nome": "FERRARI & MATOS LTDA - ME", "valor": 24519.31}, {"nome": "MONICA SANTOS DE SANTANA 00508881536", "valor": 15494.94}]}, "CE": {"faturamento": 97578.39, "icms_st": 9581.23, "num_notas": 162, "ticket_medio": 602.34, "top_revendedores": [{"nome": "IRENILDA DA SILVA GARCIA COSMETICOS", "valor": 38038.63}, {"nome": "AC COMERCIO VAREJISTA DE COSMETICOS E PRODUTOS ALIMENTICIOS", "valor": 25224.25}, {"nome": "44.612.030 MARIA AUDILENE COSTA DE ASSIS", "valor": 13911.03}, {"nome": "M D RODRIGUES MELO EIRELI", "valor": 13251.18}, {"nome": "CLAUDIA VERONICA UCHOA PINHO 83526455368", "valor": 6852.58}]}, "DF": {"faturamento": 79140.11, "icms_st": 6968.03, "num_notas": 87, "ticket_medio": 909.66, "top_revendedores": [{"nome": "BERIVANE DOS SANTOS MIRANDA - ME", "valor": 66047.01}, {"nome": "L N C DA SILVA COSMETICOS", "valor": 9366.63}, {"nome": "39.310.010 GILNARIA VIEIRA BARBOSA", "valor": 2976.32}, {"nome": "M L COMERCIO DISTR E REP DE COSMETICOS LTDA ME", "valor": 750.15}]}, "ES": {"faturamento": 485011.12, "icms_st": 869.4, "num_notas": 370, "ticket_medio": 1310.84, "top_revendedores": [{"nome": "JULIANA GERHARDT", "valor": 88151.42}, {"nome": "D & A COSMETICOS LTDA ME", "valor": 74072.2}, {"nome": "26.739.236 DELRYVANY FERREIRA CALLEGARI", "valor": 56992.69}, {"nome": "LU COMERCIO DE COSMETICOS LTDA ME", "valor": 46764.16}, {"nome": "ROSIANI DE ALMEIDA NERY", "valor": 37423.82}]}, "GO": {"faturamento": 49629.58, "icms_st": 196.28, "num_notas": 66, "ticket_medio": 751.96, "top_revendedores": [{"nome": "53663812 ELIZABETE CAIXETA DA SILVA", "valor": 35900.59}, {"nome": "54.477.214 MARIA APARECIDA DE ALMEIDA", "valor": 4819.17}, {"nome": "ELIZABETH NUNES DE O. LIMA", "valor": 4384.34}, {"nome": "KENIA ANDRADE DUARTE 78023297104", "valor": 2920.82}, {"nome": "JOELMA DA CRUZ CAMPOS", "valor": 649.48}]}, "MA": {"faturamento": 94999.72, "icms_st": 1329.31, "num_notas": 131, "ticket_medio": 725.19, "top_revendedores": [{"nome": "LETICYA PEREIRA CAMPOS DE SOUSA 00753888394", "valor": 20717.21}, {"nome": "MARIA DA CONCEICAO DA SILVA SANTOS 60779844343", "valor": 13551.12}, {"nome": "J M L DE SOUSA", "valor": 13502.0}, {"nome": "50 918 476 JUVENILDE NUNES DA SILVA", "valor": 11988.87}, {"nome": "64 316 368 RAIMUNDA NONATA SILVA BRAGA", "valor": 8986.53}]}, "MG": {"faturamento": 1273284.34, "icms_st": 167594.3, "num_notas": 1065, "ticket_medio": 1195.57, "top_revendedores": [{"nome": "ALVES BARBOSA COMERCIO DE COSMETICOS LTDA ME", "valor": 119110.78}, {"nome": "VIDA COSMETICOS LTDA ME", "valor": 103491.11}, {"nome": "CENTER VIP COMERCIO DE COSMETICOS", "valor": 102299.5}, {"nome": "KEILA SILVA CABRAL - ME", "valor": 84804.2}, {"nome": "FASS COSMETICOS LTDA", "valor": 74997.87}]}, "MS": {"faturamento": 185342.41, "icms_st": 18547.48, "num_notas": 176, "ticket_medio": 1053.08, "top_revendedores": [{"nome": "ROBERTO JOSE", "valor": 71374.49}, {"nome": "CLAUDEMIRA CALIZA S. ROCHA", "valor": 70046.9}, {"nome": "FABIANE CAMARA DE ARAUJO", "valor": 28025.65}, {"nome": "52981709 VALDIRENE MARIA DE JESUS", "valor": 14093.79}, {"nome": "LETHYCIA SILVEIRA SANCHES", "valor": 1094.73}]}, "MT": {"faturamento": 374085.99, "icms_st": 40283.02, "num_notas": 418, "ticket_medio": 894.94, "top_revendedores": [{"nome": "FREITAS E ALMEIDA LTDA", "valor": 174794.24}, {"nome": "NIVONETH G. DA SILVA COSMETICOS ME", "valor": 71774.8}, {"nome": "PIRAMIDE COSMETICOS LTDA", "valor": 50284.53}, {"nome": "M H S DE CARVALHO", "valor": 30774.83}, {"nome": "REGIANE SCHEEL 01902627105", "valor": 13908.74}]}, "PA": {"faturamento": 311112.45, "icms_st": 25080.31, "num_notas": 376, "ticket_medio": 827.43, "top_revendedores": [{"nome": "PATRICIA FERREIRA ROMEIRO COMERCIO - EPP", "valor": 65606.69}, {"nome": "QUEILOR MOISES DANIELLI", "valor": 53818.48}, {"nome": "MARIA ELISA SOUSA E SILVA 61777650259", "valor": 29058.5}, {"nome": "46.429.068 RAIMUNDO RIBEIRO DA SILVA", "valor": 24364.48}, {"nome": "JOSUE G LIMA LTDA", "valor": 22551.93}]}, "PB": {"faturamento": 290581.0, "icms_st": 25908.13, "num_notas": 422, "ticket_medio": 688.58, "top_revendedores": [{"nome": "ELZIRENE RAFAEL DE SOUZA CARVALHO ME", "valor": 65047.4}, {"nome": "TATAO COM. DE COSMETICOS LTDA", "valor": 52824.34}, {"nome": "MARIA GABRIELLA ALMEIDA LIMA WANDERLEY", "valor": 48914.08}, {"nome": "JACILEIDE BARRETO DE ARAUJO FALCAO ME", "valor": 35690.14}, {"nome": "MARIA DE LOURDES RAMOS DO NASCIMENTO ME", "valor": 22379.54}]}, "PE": {"faturamento": 398302.79, "icms_st": 49.98, "num_notas": 476, "ticket_medio": 836.77, "top_revendedores": [{"nome": "RAMOS & PEREIRA COSMETICOS E SUPLEMENTOS LTDA", "valor": 73777.76}, {"nome": "J G PINHEIRO", "valor": 42858.72}, {"nome": "NCGS COSMETICOS LTDA", "valor": 42704.9}, {"nome": "A. C. L DE ASSUNCAO PERFUMARIA COSMETICOS", "valor": 36882.39}, {"nome": "RAMOS E BRITO COMERCIO E PROMOCAO DE VENDAS LTDA", "valor": 30817.5}]}, "PI": {"faturamento": 51586.21, "icms_st": 0.0, "num_notas": 33, "ticket_medio": 1563.22, "top_revendedores": [{"nome": "60.004.788 LAURA HELENA ALVES DANIELLI", "valor": 45418.37}, {"nome": "JOICIELE LUSTOZA DE SOUSA 03172747328", "valor": 3277.59}, {"nome": "51.151.834 EVANILDA MARIA DE OLIVEIRA", "valor": 2890.25}]}, "PR": {"faturamento": 913616.68, "icms_st": 0.0, "num_notas": 590, "ticket_medio": 1548.5, "top_revendedores": [{"nome": "BASTON INDUSTRIA DE AEROSSOIS LTDA", "valor": 300000.0}, {"nome": "FORLIN & FURUKAWA COSMETICOS LTDA", "valor": 86924.53}, {"nome": "RONIEV COSMETICOS LTDA", "valor": 69742.05}, {"nome": "ERIKA KRAFT GOHL E CIA LTDA", "valor": 68962.62}, {"nome": "GERALDO DA SILVA DE SALES - ME", "valor": 51450.1}]}, "RJ": {"faturamento": 108106.57, "icms_st": 7630.62, "num_notas": 69, "ticket_medio": 1566.76, "top_revendedores": [{"nome": "SILVEIRA E AZEVEDO COM COSM LTDA ME", "valor": 32570.3}, {"nome": "ELIZABETH CRISTINA F S BIZZO EIRELI - ME", "valor": 21475.05}, {"nome": "KCA COM COSM E PERFUMARIA LTDA", "valor": 16270.95}, {"nome": "JB COSMETICOS & CIA LTDA", "valor": 15126.88}, {"nome": "RHP COSMETICOS EIRELI", "valor": 11716.11}]}, "RN": {"faturamento": 103193.25, "icms_st": 446.93, "num_notas": 180, "ticket_medio": 573.3, "top_revendedores": [{"nome": "RITA DE CASSIA GALDINO FONSECA 91277019487", "valor": 31117.66}, {"nome": "RAIANNY RAMOS ARRUDA EPP", "valor": 24662.01}, {"nome": "LUCIANA CRISTINA DE SOUSA LIMA ARAUJO", "valor": 21799.17}, {"nome": "DEG TREINAMENTO E CONSULTORIA LTDA", "valor": 17162.13}, {"nome": "54.521.260 LUIZ MARCELINO DE SOUZA FILHO", "valor": 5384.88}]}, "RO": {"faturamento": 171207.88, "icms_st": 322.63, "num_notas": 187, "ticket_medio": 915.55, "top_revendedores": [{"nome": "RECANTO COSMETICOS LTDA", "valor": 92939.35}, {"nome": "FC COMERCIO DE COSMETICOS LTDA", "valor": 26134.68}, {"nome": "SILVANA MARINHO DA SILVA", "valor": 15741.7}, {"nome": "DANIEL ROBERTO SCHLICKMANN", "valor": 14604.71}, {"nome": "EDINEIA DE CASTRO SCHWABE", "valor": 9761.4}]}, "RR": {"faturamento": 1290.75, "icms_st": 134.18, "num_notas": 5, "ticket_medio": 258.15, "top_revendedores": [{"nome": "MARIA DO SOCORRO RABELO NOBRE", "valor": 624.48}, {"nome": "RAMIRO GOUVEIA DE ANDRADE", "valor": 566.09}, {"nome": "SOLANGE ZANUTO CAMARGO", "valor": 100.18}]}, "RS": {"faturamento": 96592.83, "icms_st": 13431.15, "num_notas": 142, "ticket_medio": 680.23, "top_revendedores": [{"nome": "SARAI ANA GALINA", "valor": 53460.81}, {"nome": "MALIZE PETRY - ME", "valor": 27633.2}, {"nome": "TESE CENTRO DE DISTRIB DE PROD DE PERFUM LTDA", "valor": 6861.11}, {"nome": "CRISTIANE JANIR CARDOSO DOS SANTOS", "valor": 3372.17}, {"nome": "63.049.680 MIRIAM BRUN KIELING", "valor": 1673.1}]}, "SC": {"faturamento": 339449.92, "icms_st": 0.0, "num_notas": 362, "ticket_medio": 937.71, "top_revendedores": [{"nome": "MARLEI COSMETICOS LTDA", "valor": 71324.73}, {"nome": "H J FISCHER ME", "valor": 35193.8}, {"nome": "VANDERLEI SLONGO JUNIOR 10549228969", "valor": 34969.95}, {"nome": "ITAPEMA BEACH HOTEIS S.A", "valor": 32287.72}, {"nome": "CHAGIA COMERCIAL DE COSMETICOS LTDA ME", "valor": 28151.69}]}, "SE": {"faturamento": 14037.87, "icms_st": 0.0, "num_notas": 13, "ticket_medio": 1079.84, "top_revendedores": [{"nome": "54.196.572 GENARIO DOS SANTOS", "valor": 6184.92}, {"nome": "MARIA JOSE OLIVEIRA SANTOS JOELMA ME", "valor": 5221.09}, {"nome": "54.196.881 SILVIA SILVA MECENAS SANTOS", "valor": 2631.86}]}, "SP": {"faturamento": 2026440.09, "icms_st": 206276.64, "num_notas": 934, "ticket_medio": 2169.64, "top_revendedores": [{"nome": "WALTER LUIZ STURARO JUNIOR - ME", "valor": 324190.04}, {"nome": "AL DE ALMEIDA JUNIOR EIRELI", "valor": 304999.99}, {"nome": "JANAINA CAUMO COSMETICOS LTDA", "valor": 203536.09}, {"nome": "AJI COMERCIO E ESTETICA LTDA", "valor": 143003.8}, {"nome": "RS SILVA VENDA DE VESTUARIO E COSMETICOS LTDA", "valor": 128862.47}]}, "TO": {"faturamento": 2757.82, "icms_st": 318.96, "num_notas": 5, "ticket_medio": 551.56, "top_revendedores": [{"nome": "EUNICE ALVES PEREIRA", "valor": 1467.06}, {"nome": "ALESSANDRA MARTINS CORREIA", "valor": 938.38}, {"nome": "ERICA SANTOS MACHADO", "valor": 352.38}]}}}, "totais": {"jan": {"faturamento": 2586209.11, "icms_st": 212563.41, "num_notas": 1789, "ticket_medio": 1445.62, "num_estados": 25}, "fev": {"faturamento": 2746503.48, "icms_st": 152826.21, "num_notas": 2326, "ticket_medio": 1180.78, "num_estados": 27}, "mar": {"faturamento": 2592735.79, "icms_st": 185312.3, "num_notas": 2602, "ticket_medio": 996.44, "num_estados": 26}, "tri": {"faturamento": 7925448.38, "icms_st": 550701.92, "num_notas": 6717, "ticket_medio": 1179.91, "num_estados": 27}}};
+let _currentPeriod = 'tri';
+let _currentMetric = 'faturamento';
+let _mapBuilt = false;
+
+const PERIOD_LABEL = {jan:'Janeiro 2026', fev:'Fevereiro 2026', mar:'Março 2026', tri:'1º Trimestre 2026'};
+const UF_NAMES = {
+  AC:'Acre', AL:'Alagoas', AP:'Amapá', AM:'Amazonas', BA:'Bahia', CE:'Ceará',
+  DF:'Distrito Federal', ES:'Espírito Santo', GO:'Goiás', MA:'Maranhão',
+  MT:'Mato Grosso', MS:'Mato Grosso do Sul', MG:'Minas Gerais', PA:'Pará',
+  PB:'Paraíba', PR:'Paraná', PE:'Pernambuco', PI:'Piauí', RJ:'Rio de Janeiro',
+  RN:'Rio Grande do Norte', RS:'Rio Grande do Sul', RO:'Rondônia', RR:'Roraima',
+  SC:'Santa Catarina', SP:'São Paulo', SE:'Sergipe', TO:'Tocantins'
+};
+function normalize(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
+const NAME_TO_UF = {};
+Object.entries(UF_NAMES).forEach(([uf,nm])=>{ NAME_TO_UF[normalize(nm)] = uf; });
+NAME_TO_UF['distrito federal'] = 'DF';
+
+function fmtBRL(v){
+  if (v == null || isNaN(v)) return 'R$ 0,00';
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtBRLShort(v){
+  v = Number(v)||0;
+  if (v >= 1e6) return 'R$ ' + (v/1e6).toFixed(2).replace('.',',') + ' mi';
+  if (v >= 1e3) return 'R$ ' + (v/1e3).toFixed(1).replace('.',',') + ' mil';
+  return 'R$ ' + v.toFixed(0);
+}
+function fmtNum(v){ return Number(v||0).toLocaleString('pt-BR'); }
+
+function colorScale(value, max){
+  if (!max || value <= 0) return 'rgba(30,41,59,.75)';
+  const t = Math.max(0, Math.min(1, Math.pow(value/max, 0.55)));
+  const stops = [
+    [0.0, [30,58,95]],
+    [0.25,[37,99,235]],
+    [0.5, [99,102,241]],
+    [0.75,[168,85,247]],
+    [1.0, [236,72,153]]
+  ];
+  for (let i=0; i<stops.length-1; i++){
+    if (t <= stops[i+1][0]){
+      const a=stops[i], b=stops[i+1];
+      const k=(t-a[0])/(b[0]-a[0]);
+      const r=Math.round(a[1][0]+(b[1][0]-a[1][0])*k);
+      const g=Math.round(a[1][1]+(b[1][1]-a[1][1])*k);
+      const bl=Math.round(a[1][2]+(b[1][2]-a[1][2])*k);
+      return 'rgb('+r+','+g+','+bl+')';
+    }
+  }
+  return 'rgb(236,72,153)';
+}
+
+async function initMap(){
+  if (_mapBuilt) return;
+  _mapBuilt = true;
+  const svg = document.getElementById('brMap');
+  const loading = document.getElementById('mapLoading');
+  const sources = [
+    'https://cdn.jsdelivr.net/gh/codeforgermany/click_that_hood@master/public/data/brazil-states.geojson',
+    'https://raw.githubusercontent.com/codeforgermany/click_that_hood/master/public/data/brazil-states.geojson'
+  ];
+  let geo = null;
+  for (const url of sources){
+    try{
+      const resp = await fetch(url);
+      if (resp.ok){ geo = await resp.json(); break; }
+    }catch(e){}
+  }
+  if (!geo){
+    loading.textContent = 'Não foi possível carregar o mapa do Brasil. Use o ranking ao lado.';
+    return;
+  }
+  loading.style.display = 'none';
+
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  function eachCoord(coords, cb){
+    if (typeof coords[0]==='number'){ cb(coords); return; }
+    for (const c of coords) eachCoord(c, cb);
+  }
+  for (const f of geo.features){
+    eachCoord(f.geometry.coordinates, (p)=>{
+      if (p[0]<minX) minX=p[0]; if (p[0]>maxX) maxX=p[0];
+      if (p[1]<minY) minY=p[1]; if (p[1]>maxY) maxY=p[1];
+    });
+  }
+  const W=600,H=600, pad=10;
+  const s = Math.min((W-2*pad)/(maxX-minX), (H-2*pad)/(maxY-minY));
+  const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+  function project(p){
+    const x = pad + (p[0]-cx)*s + (W-2*pad)/2;
+    const y = pad - (p[1]-cy)*s + (H-2*pad)/2;
+    return [x, y];
+  }
+  function pathFromGeom(geom){
+    let d='';
+    const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+    for (const poly of polys){
+      for (const ring of poly){
+        const proj = ring.map(project);
+        d += 'M' + proj.map(pt=>pt[0].toFixed(1)+','+pt[1].toFixed(1)).join('L') + 'Z';
+      }
+    }
+    return d;
+  }
+  function centroid(geom){
+    let sx=0, sy=0, n=0;
+    eachCoord(geom.coordinates, p=>{ const q=project(p); sx+=q[0]; sy+=q[1]; n++; });
+    return [sx/n, sy/n];
+  }
+
+  const ns = 'http://www.w3.org/2000/svg';
+  for (const f of geo.features){
+    const rawName = f.properties.name || f.properties.NAME || f.properties.estado || f.properties.sigla || '';
+    const uf = NAME_TO_UF[normalize(rawName)] || '';
+    const p = document.createElementNS(ns, 'path');
+    p.setAttribute('d', pathFromGeom(f.geometry));
+    p.setAttribute('data-uf', uf);
+    p.setAttribute('fill', 'rgba(30,41,59,.7)');
+    svg.appendChild(p);
+    if (uf){
+      const [cxp, cyp] = centroid(f.geometry);
+      const t = document.createElementNS(ns, 'text');
+      t.setAttribute('class','uf-label');
+      t.setAttribute('x', cxp.toFixed(1));
+      t.setAttribute('y', (cyp+3).toFixed(1));
+      t.textContent = uf;
+      svg.appendChild(t);
+      p.addEventListener('mousemove', (ev)=>showTip(ev, uf));
+      p.addEventListener('mouseleave', hideTip);
+    }
+  }
+  renderAll();
+}
+
+function showTip(ev, uf){
+  const tip = document.getElementById('mapTooltip');
+  const d = (RACCO_DATA.periodos[_currentPeriod]||{})[uf];
+  if (!d){
+    tip.innerHTML = '<h4>'+uf+' — '+(UF_NAMES[uf]||'')+'</h4><div class="tt-row">Sem operações no período</div>';
+  } else {
+    let topHtml = '<div class="tt-top"><div class="tt-top-title">Top revendedores</div>';
+    (d.top_revendedores||[]).slice(0,3).forEach(r=>{
+      const nm = (r.nome||'').substring(0,28) + ((r.nome||'').length>28?'…':'');
+      topHtml += '<div class="tt-top-item"><span>'+nm+'</span><b>'+fmtBRLShort(r.valor)+'</b></div>';
+    });
+    topHtml += '</div>';
+    tip.innerHTML =
+      '<h4>'+uf+' — '+(UF_NAMES[uf]||'')+'</h4>'+
+      '<div class="tt-row"><span>Faturamento</span><b>'+fmtBRL(d.faturamento)+'</b></div>'+
+      '<div class="tt-row"><span>ICMS-ST</span><b>'+fmtBRL(d.icms_st)+'</b></div>'+
+      '<div class="tt-row"><span>NFs</span><b>'+fmtNum(d.num_notas)+'</b></div>'+
+      '<div class="tt-row"><span>Ticket médio</span><b>'+fmtBRL(d.ticket_medio)+'</b></div>'+
+      topHtml;
+  }
+  const wrap = document.getElementById('brMapWrap').getBoundingClientRect();
+  const x = ev.clientX - wrap.left + 14;
+  const y = ev.clientY - wrap.top + 14;
+  tip.style.left = Math.min(x, wrap.width - 300) + 'px';
+  tip.style.top  = Math.min(y, wrap.height - 200) + 'px';
+  tip.classList.add('visible');
+}
+function hideTip(){ document.getElementById('mapTooltip').classList.remove('visible'); }
+
+function renderAll(){
+  const periodData = RACCO_DATA.periodos[_currentPeriod] || {};
+  const totais = RACCO_DATA.totais[_currentPeriod] || {};
+  document.getElementById('periodLabel').textContent = PERIOD_LABEL[_currentPeriod];
+  document.getElementById('kpi-fat').textContent    = fmtBRL(totais.faturamento);
+  document.getElementById('kpi-icms').textContent   = fmtBRL(totais.icms_st);
+  document.getElementById('kpi-nfs').textContent    = fmtNum(totais.num_notas);
+  document.getElementById('kpi-ticket').textContent = fmtBRL(totais.ticket_medio);
+  document.getElementById('kpi-ufs').textContent    = fmtNum(totais.num_estados);
+
+  let maxFat = 0;
+  for (const uf in periodData){ if (periodData[uf][_currentMetric] > maxFat) maxFat = periodData[uf][_currentMetric]; }
+
+  const svg = document.getElementById('brMap');
+  if (svg){
+    svg.querySelectorAll('path[data-uf]').forEach(p=>{
+      const uf = p.getAttribute('data-uf');
+      const d = periodData[uf];
+      const v = d ? (d[_currentMetric]||0) : 0;
+      p.setAttribute('fill', colorScale(v, maxFat));
+    });
+  }
+
+  document.getElementById('legendTitle').textContent = (_currentMetric==='icms_st'?'ICMS-ST':'Faturamento')+' (R$)';
+  document.getElementById('legMin').textContent = fmtBRLShort(0);
+  document.getElementById('legMid').textContent = fmtBRLShort(maxFat/2);
+  document.getElementById('legMax').textContent = fmtBRLShort(maxFat);
+
+  const rows = Object.entries(periodData).map(([uf, d])=>({uf, ...d}));
+  rows.sort((a,b)=> (b[_currentMetric]||0) - (a[_currentMetric]||0));
+  const rb = document.getElementById('rankingBody');
+  let html = '';
+  rows.forEach((r, i)=>{
+    const v = r[_currentMetric]||0;
+    const pct = maxFat ? (v/maxFat*100) : 0;
+    html += '<div class="rank-row" onmouseenter="highlightUf(\''+r.uf+'\',true)" onmouseleave="highlightUf(\''+r.uf+'\',false)">'
+         +  '<span class="rk-pos">'+(i+1)+'</span>'
+         +  '<span class="rk-uf">'+r.uf+'</span>'
+         +  '<span class="rk-bar"><span style="width:'+pct.toFixed(1)+'%"></span></span>'
+         +  '<span class="rk-val">'+fmtBRLShort(v)+'</span>'
+         +  '</div>';
+  });
+  rb.innerHTML = html;
+}
+
+function selectPeriod(p){
+  _currentPeriod = p;
+  document.querySelectorAll('.period-btn').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-p')===p);
+  });
+  renderAll();
+}
+function selectMetric(m){
+  _currentMetric = m;
+  document.querySelectorAll('.rank-metric').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-metric')===m);
+  });
+  renderAll();
+}
+function highlightUf(uf, on){
+  const p = document.querySelector('#brMap path[data-uf="'+uf+'"]');
+  if (!p) return;
+  if (on){ p.style.filter = 'brightness(1.35)'; p.style.stroke = '#fff'; p.style.strokeWidth='1.6'; }
+  else { p.style.filter=''; p.style.stroke=''; p.style.strokeWidth=''; }
+}
+
+initMap();
+renderAll();
+
+const ST_DATA = {"ncms": [{"ncm": "3307.20.90", "valor_icms_st": 180433.64, "base_icms_st": 1131294.95, "valor_produto": 660657.0, "num_itens": 1751, "exemplos": ["REGULATEUR CREME DESODORANTE - 60G", "CREME DESODORANTE PARA OS PES PRINCIPLES RACCO", "DESODORANTE INTIMO JATO SECO RACCO"], "descricao": "Desodorantes corporais e antiperspirantes - outros", "aliquota_efetiva": 15.95}, {"ncm": "3307.10.00", "valor_icms_st": 127032.56, "base_icms_st": 878528.38, "valor_produto": 422335.0, "num_itens": 317, "exemplos": ["MOUSSE SPRAY DEPILATORIO DEPEELING - 150ML/120G", "CREME DEPILATORIO DEPEELING - 150G"], "descricao": "Preparações para barbear (antes, durante ou após)", "aliquota_efetiva": 14.46}, {"ncm": "3401.30.00", "valor_icms_st": 96250.77, "base_icms_st": 825825.35, "valor_produto": 522146.08, "num_itens": 1578, "exemplos": ["SABONETE LIQUIDO INTIMO FEMININO RACCO", "SABONETE LIQUIDO INTIMO FEMININO MORANGO RACCO", "SABONETE LIQUIDO INTIMO MASCULINO FOR MEN RACCO"], "descricao": "Produtos e preparações orgânicas tensoativas p/ lavagem da pele", "aliquota_efetiva": 11.66}, {"ncm": "3304.99.90", "valor_icms_st": 76914.63, "base_icms_st": 369544.22, "valor_produto": 227248.25, "num_itens": 2045, "exemplos": ["BASE CREMOSA COM ACIDO HIALURONICO E VITAMINA E LUZES RACCO", "OLEO RELAXANTE PARA PERNAS DEFATIGANT MULTI", "SOS SPRAY MULTIFUNCIONAL MULTI ALOE"], "descricao": "Preparações de beleza, maquiagem e cuidado da pele - outros", "aliquota_efetiva": 20.81}, {"ncm": "3307.20.10", "valor_icms_st": 46242.31, "base_icms_st": 278419.21, "valor_produto": 181385.93, "num_itens": 1318, "exemplos": ["DEO COLONIA FEMININA LILAC", "DESODORANTE ROLL-ON REGULATEUR - 55ML", "DEO COLONIA MALLE INTENSE"], "descricao": "Desodorantes corporais e antiperspirantes - líquidos", "aliquota_efetiva": 16.61}, {"ncm": "3305.90.00", "valor_icms_st": 11847.52, "base_icms_st": 54808.84, "valor_produto": 32487.2, "num_itens": 527, "exemplos": ["COLORACAO CREME COLOR.ACTION N. 4 CASTANHO MEDIO", "COLORACAO CREME COLOR.ACTION N. 5.7 CASTANHO TABACO", "COLORACAO CREME COLOR.ACTION N. 6 LOURO ESCURO"], "descricao": "Preparações capilares - outras", "aliquota_efetiva": 21.62}, {"ncm": "3305.10.00", "valor_icms_st": 4102.21, "base_icms_st": 25924.96, "valor_produto": 17228.14, "num_itens": 265, "exemplos": ["SHAMPOO MAIS PURA - 250G", "SHAMPOO RESTAURADOR P/ FIOS SECOS E DANIFICADOS TRATAMENTO P"], "descricao": "Xampus para cabelos", "aliquota_efetiva": 15.82}, {"ncm": "2106.90.30", "valor_icms_st": 3757.9, "base_icms_st": 30372.5, "valor_produto": 20354.43, "num_itens": 106, "exemplos": ["FIBRALIFE FRESH CHA VERDE - 200G", "IOS - COLLAGEN LIFE - COLAGENO HIDROLISADO EM PO", "IOS ALOE LIFE SUPL. PRONTO P BEBER C VIT C ALOE VERA"], "descricao": "Complementos alimentares", "aliquota_efetiva": 12.37}, {"ncm": "3401.11.90", "valor_icms_st": 2314.59, "base_icms_st": 17112.97, "valor_produto": 11502.58, "num_itens": 97, "exemplos": ["SABONETE DE ALGAS MARINHAS ARL - 90G"], "descricao": "Sabões em barras, pães, pedaços - outros", "aliquota_efetiva": 13.53}, {"ncm": "3306.10.00", "valor_icms_st": 1593.56, "base_icms_st": 12544.77, "valor_produto": 8854.11, "num_itens": 137, "exemplos": ["CREME DENTAL MULTI ALOE COM FLUOR - 90G"], "descricao": "Dentifrícios", "aliquota_efetiva": 12.7}, {"ncm": "2847.00.00", "valor_icms_st": 181.91, "base_icms_st": 1294.52, "valor_produto": 844.7, "num_itens": 48, "exemplos": ["EMULSAO OXIDANTE 20 VOLUMES COLOR ACTION", "EMULSAO OXIDANTE 30 VOLUMES COLOR ACTION"], "descricao": "Peróxido de hidrogênio (água oxigenada)", "aliquota_efetiva": 14.05}, {"ncm": "3304.30.00", "valor_icms_st": 19.65, "base_icms_st": 105.77, "valor_produto": 56.6, "num_itens": 1, "exemplos": ["FLUIDO ENDURECEDOR DE UNHAS LUZES"], "descricao": "Preparações para manicuros e pedicuros", "aliquota_efetiva": 18.58}, {"ncm": "4202.22.20", "valor_icms_st": 10.09, "base_icms_st": 60.79, "valor_produto": 37.27, "num_itens": 2, "exemplos": ["NECESSAIRE BRANCA COM LOGO LARANJA RACCO"], "descricao": "Bolsas tiracolo", "aliquota_efetiva": 16.6}, {"ncm": "4819.10.00", "valor_icms_st": 0.58, "base_icms_st": 5.55, "valor_produto": 3.54, "num_itens": 1, "exemplos": ["EMBALAGENS PARA PRESENTE RACCO BRANCA E LARANJA"], "descricao": "Caixas de papel/cartão ondulado", "aliquota_efetiva": 10.45}], "cfops": [{"cfop": "6404", "valor_icms_st": 550591.25, "base_icms_st": 3625162.01, "num_itens": 8182, "descricao": "Venda de mercadoria sujeita ao regime de ST (interestadual)", "aliquota_efetiva": 15.19}, {"cfop": "6910", "valor_icms_st": 110.67, "base_icms_st": 680.77, "num_itens": 11, "descricao": "Remessa em bonificação/brinde (interestadual)", "aliquota_efetiva": 16.26}], "total_icms_st": 550701.92, "total_base_st": 3625842.78, "total_itens_com_st": 8193, "cfops_all": [{"cfop": "6404", "descricao": "Venda de merc. sujeita ao regime de ST, substituído (interestadual)", "valor_total": 2739738.41, "valor_icms_st": 550591.25, "base_icms_st": 3625162.17, "num_itens": 8190, "num_nfs": 1316, "pct_faturamento": 34.57, "pct_icms_st": 99.98, "gera_st": true, "aliquota_efetiva": 15.19}, {"cfop": "6933", "descricao": "Prestação de serviço tributada pelo ISS (interestadual)", "valor_total": 2688820.48, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 3828, "num_nfs": 3828, "pct_faturamento": 33.93, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "6102", "descricao": "Venda de mercadoria adquirida/recebida de terceiros (interestadual)", "valor_total": 1353818.09, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 6201, "num_nfs": 1148, "pct_faturamento": 17.08, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "5405", "descricao": "Venda de merc. adquirida/recebida em operação com ST, substituído (intra)", "valor_total": 343933.66, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 1307, "num_nfs": 237, "pct_faturamento": 4.34, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "5603", "descricao": "Recebimento p/ depósito de sócios (ou equivalente) — verificar detalhe", "valor_total": 300000.0, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 3, "num_nfs": 3, "pct_faturamento": 3.79, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "5933", "descricao": "Prestação de serviço tributada pelo ISS (intraestadual)", "valor_total": 232489.8, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 307, "num_nfs": 307, "pct_faturamento": 2.93, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "6910", "descricao": "Remessa em bonificação, doação ou brinde (interestadual)", "valor_total": 199727.48, "valor_icms_st": 110.67, "base_icms_st": 680.77, "num_itens": 984, "num_nfs": 321, "pct_faturamento": 2.52, "pct_icms_st": 0.02, "gera_st": true, "aliquota_efetiva": 16.26}, {"cfop": "6914", "descricao": "Remessa p/ exposição ou feira (interestadual)", "valor_total": 30287.72, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 179, "num_nfs": 16, "pct_faturamento": 0.38, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "5102", "descricao": "Venda de mercadoria adquirida/recebida de terceiros (intraestadual)", "valor_total": 24771.16, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 157, "num_nfs": 90, "pct_faturamento": 0.31, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "5910", "descricao": "Remessa em bonificação, doação ou brinde (intraestadual)", "valor_total": 8359.96, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 73, "num_nfs": 32, "pct_faturamento": 0.11, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "5118", "descricao": "Venda de produção do estabelecimento - outros (intraestadual)", "valor_total": 4062.1, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 15, "num_nfs": 1, "pct_faturamento": 0.05, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "6904", "descricao": "Remessa p/ venda fora do estabelecimento (interestadual)", "valor_total": 0.0, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 24, "num_nfs": 6, "pct_faturamento": 0.0, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}, {"cfop": "2202", "descricao": "Devolução de compra p/ comercialização (entrada interestadual)", "valor_total": -560.48, "valor_icms_st": 0.0, "base_icms_st": 0.0, "num_itens": 14, "num_nfs": 1, "pct_faturamento": -0.01, "pct_icms_st": 0.0, "gera_st": false, "aliquota_efetiva": 0}], "faturamento_total": 7925448.38};
+(function renderSTSection(){
+  document.getElementById('stTotal').textContent    = fmtBRL(ST_DATA.total_icms_st);
+  document.getElementById('stBase').textContent     = fmtBRL(ST_DATA.total_base_st);
+  document.getElementById('stItens').textContent    = fmtNum(ST_DATA.total_itens_com_st);
+  document.getElementById('stNcmCount').textContent = fmtNum(ST_DATA.ncms.length);
+  document.getElementById('stCfopCount').textContent= fmtNum((ST_DATA.cfops_all||ST_DATA.cfops).length);
+  document.getElementById('stNcmBadge').textContent = ST_DATA.ncms.length + ' NCMs';
+  document.getElementById('stCfopBadge').textContent = (ST_DATA.cfops_all||ST_DATA.cfops).length + ' CFOPs (' + ST_DATA.cfops.length + ' c/ ST)';
+
+  const maxN = Math.max(...ST_DATA.ncms.map(n=>n.valor_icms_st));
+  const ncmBody = document.getElementById('stNcmBody');
+  ncmBody.innerHTML = ST_DATA.ncms.map(n=>{
+    const pct = maxN ? (n.valor_icms_st/maxN*100).toFixed(1) : 0;
+    return '<tr>'+
+      '<td><span class="st-code">'+n.ncm+'</span></td>'+
+      '<td class="st-desc">'+(n.descricao||'—')+'</td>'+
+      '<td class="st-num">'+fmtBRLShort(n.base_icms_st)+'</td>'+
+      '<td class="st-num"><span class="st-num-strong">'+fmtBRLShort(n.valor_icms_st)+'</span><div class="st-bar"><span style="width:'+pct+'%"></span></div></td>'+
+      '<td class="st-num"><span class="st-aliq">'+n.aliquota_efetiva.toFixed(1).replace('.',',')+'%</span></td>'+
+      '</tr>';
+  }).join('');
+
+  const cfopsAll = ST_DATA.cfops_all || ST_DATA.cfops;
+  const maxFat = Math.max(...cfopsAll.map(c=>c.valor_total||c.valor_icms_st||0));
+  const cfopBody = document.getElementById('stCfopBody');
+  cfopBody.innerHTML = cfopsAll.map(c=>{
+    const pctBar = maxFat ? ((c.valor_total||0)/maxFat*100).toFixed(1) : 0;
+    const pctFat = (c.pct_faturamento!=null) ? c.pct_faturamento.toFixed(2).replace('.',',')+'%' : '—';
+    const pctSt  = (c.pct_icms_st!=null && c.valor_icms_st>0) ? c.pct_icms_st.toFixed(2).replace('.',',')+'%' : '—';
+    const stVal  = c.valor_icms_st>0 ? fmtBRLShort(c.valor_icms_st) : '<span style="color:#64748b">—</span>';
+    const rowCls = c.valor_icms_st>0 ? '' : ' style="opacity:.85"';
+    return '<tr'+rowCls+'>'+
+      '<td><span class="st-code">'+c.cfop+'</span></td>'+
+      '<td class="st-desc">'+(c.descricao||'—')+'</td>'+
+      '<td class="st-num"><span class="st-num-strong">'+fmtBRLShort(c.valor_total||0)+'</span><div class="st-bar"><span style="width:'+pctBar+'%"></span></div></td>'+
+      '<td class="st-num">'+pctFat+'</td>'+
+      '<td class="st-num"><span class="st-num-strong">'+stVal+'</span></td>'+
+      '<td class="st-num">'+(pctSt!=='—'?'<span class="st-aliq">'+pctSt+'</span>':'<span style="color:#64748b">—</span>')+'</td>'+
+      '<td class="st-num">'+fmtNum(c.num_itens)+'</td>'+
+      '</tr>';
+  }).join('');
+})();
+
+</script>
+</body>
+</html>
